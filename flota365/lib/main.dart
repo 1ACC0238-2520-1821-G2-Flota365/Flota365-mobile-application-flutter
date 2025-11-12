@@ -35,15 +35,30 @@ class FlotaApp extends StatelessWidget {
       // 🚀 Ruta dinámica con seguridad en argumentos
       onGenerateRoute: (settings) {
         if (settings.name == '/driver/home') {
-          // Lee los argumentos sin castear
-          final driverId = settings.arguments?.toString() ?? '';
-          debugPrint('🟢 Argumento recibido en /driver/home: $driverId');
+          final args = settings.arguments;
+          String driverId = '';
+          String? fullName;
+          String? email;
+
+          if (args is Map) {
+            driverId = args['driverId']?.toString() ?? '';
+            fullName = args['fullName']?.toString();
+            email    = args['email']?.toString();
+          } else if (args is String) {
+            driverId = args;
+          }
+
+          debugPrint('🟢 /driver/home args => id=$driverId, fullName=$fullName, email=$email, type=${args.runtimeType}');
+
           return MaterialPageRoute(
             builder: (_) => DriverDashboardPage(driverId: driverId),
           );
         }
         return null;
       },
+
+
+
     );
   }
 }
