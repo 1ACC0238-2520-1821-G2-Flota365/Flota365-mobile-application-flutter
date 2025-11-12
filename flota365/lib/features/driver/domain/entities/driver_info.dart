@@ -1,19 +1,25 @@
 class DriverInfo {
   final String id;
   final String fullName;
-  final String email;
+  final String? email;
 
-  const DriverInfo({
+  DriverInfo({
     required this.id,
     required this.fullName,
-    required this.email,
+    this.email,
   });
 
-  factory DriverInfo.fromJson(Map<String, dynamic> j) => DriverInfo(
-        id: (j['id'] ?? '').toString(),
-        fullName: (j['fullName'] ??
-                '${j['firstName'] ?? ''} ${j['lastName'] ?? ''}')
-            .trim(),
-        email: (j['email'] ?? '').toString(),
-      );
+  factory DriverInfo.fromJson(Map<String, dynamic> json) {
+    return DriverInfo(
+      id: json['id']?.toString() ?? '',
+      fullName: json['fullName'] ?? json['name'] ?? json['nombre'] ?? 'Conductor',
+      email: json['email'],
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'fullName': fullName,
+        'email': email,
+      };
 }

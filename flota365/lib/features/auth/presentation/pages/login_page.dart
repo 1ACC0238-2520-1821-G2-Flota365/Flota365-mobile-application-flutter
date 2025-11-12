@@ -1,3 +1,4 @@
+import 'package:flota365/features/driver/presentation/pages/driver_args.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -49,22 +50,27 @@ class _LoginViewState extends State<_LoginView> {
               child: BlocConsumer<LoginBloc, LoginState>(
               listener: (context, state) {
                 if (state.status == Status.success && state.user != null) {
-                  final user = state.user!;
-                  final role = (user.role ?? '').toLowerCase();
+                  final u = state.user!;
+                  final role = (u.role ?? '').toLowerCase();
 
                   if (role == 'conductor' || role == 'driver') {
-                    // ⚠️ pasamos SIEMPRE un String
-                    final driverIdArg = (user.id ?? user.email ?? '').toString();
+                    // Enviamos SIEMPRE un mapa de argumentos (con claves consistentes)
+                    final args = {
+                      'driverId' : (u.id ?? '').toString(),
+                      'fullName' : (u.fullName ?? '').toString(),
+                      'email'    : (u.email ?? '').toString(),
+                    };
 
                     Navigator.pushNamedAndRemoveUntil(
                       context,
                       '/driver/home',
                       (_) => false,
-                      arguments: driverIdArg,
+                      arguments: args,
                     );
                   } else {
                     Navigator.pushNamedAndRemoveUntil(context, '/manager/home', (_) => false);
                   }
+
                 }
 
                 if (state.status == Status.failure && state.error != null) {
@@ -73,6 +79,7 @@ class _LoginViewState extends State<_LoginView> {
                     ..showSnackBar(SnackBar(content: Text(state.error!)));
                 }
               },
+
 
 
                 builder: (context, state) {

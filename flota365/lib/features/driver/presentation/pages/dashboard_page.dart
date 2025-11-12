@@ -1,3 +1,4 @@
+// lib/features/driver/presentation/pages/dashboard_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/enums/status.dart';
@@ -28,8 +29,14 @@ class _DashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Flota365 - Conductor')),
+      // usa colores del theme
+      backgroundColor: theme.colorScheme.background,
+      appBar: AppBar(
+        title: const Text('Flota365 - Conductor'),
+      ),
       drawer: Drawer(
         child: ListView(
           children: const [
@@ -44,111 +51,120 @@ class _DashboardView extends StatelessWidget {
           if (state.status == Status.loading) {
             return const Center(child: CircularProgressIndicator());
           }
-
           if (state.status == Status.failure) {
             return Center(child: Text(state.error ?? 'Error al cargar datos'));
           }
 
           final current = state.current;
-          final profile = state.profile;
+          final fullName =
+              (state.profile?['fullName'] ?? 'Conductor').toString().trim();
 
-          return Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // ---- Tarjeta de bienvenida ----
-                Card(
-                  child: ListTile(
-                    title: Text(
-                      'Bienvenido, ${profile?['fullName'] ?? 'Conductor'}',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(
-                      'Email: ${profile?['email'] ?? '-'}\nID: ${state.driverId}',
+          return SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // ── Bienvenida: SOLO el nombre (sin email/ID) ───────────────
+                  Card(
+                    child: ListTile(
+                      title: Text(
+                        'Bienvenido, $fullName',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      // 👇 importante: NADA de subtitle aquí
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
-                // ---- Información de la jornada ----
-                Card(
-                  child: ListTile(
-                    title: Text('Bienvenido, ${state.profile?['fullName'] ?? state.driverId}'),
-                    subtitle: Text(
-                      current == null
-                          ? 'Sin assignment activo'
-                          : 'Ruta: ${current['route'] ?? current['routeId']?.toString() ?? '-'}\nID: ${current['id']?.toString() ?? '-'}',
+                  // ── Jornada actual (mínimo texto) ───────────────────────────
+                  Card(
+                    child: ListTile(
+                      title: Text(
+                        'Jornada actual',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      subtitle: Text(
+                        current == null
+                            ? 'Sin assignment activo'
+                            : 'Ruta: ${current['route'] ?? current['routeId']?.toString() ?? '-'}',
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
 
-                // ---- Botones principales ----
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: current == null
-                            ? null
-                            : () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => CheckInPage(
-                                      assignmentId: current['id']?.toString() ?? '',
-                                    ),
-                                  ),
-                                );
-                              },
-                        child: const Text('Check-In'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: current == null
-                            ? null
-                            : () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => CheckOutPage(
-                                      assignmentId: current['id']?.toString() ?? '',
-                                    ),
-                                  ),
-                                );
-                              },
-                        child: const Text('Check-Out'),
-                      ),
-                    ),
-                  ],
-                ),
+                  const SizedBox(height: 16),
 
-
-                const SizedBox(height: 16),
-
-                // ---- Mensaje y botón para crear jornada ----
-                if (current == null)
-                  Column(
+                  // ── Botones principales ────────────────────────────────────
+                  Row(
                     children: [
-                      const Text(
-                        'No se encontró un assignment activo para este conductor.\n'
-                        'Puedes crear una nueva jornada a continuación:',
-                        textAlign: TextAlign.center,
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: current == null
+                              ? null
+                              : () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => CheckInPage(
+                                        assignmentId:
+                                            current['id']?.toString() ?? '',
+                                      ),
+                                    ),
+                                  );
+                                },
+                          child: const Text('Check-In'),
+                        ),
                       ),
-                      const SizedBox(height: 12),
-                      ElevatedButton.icon(
-                        onPressed: () => context
-                            .read<DashboardBloc>()
-                            .add(DashboardCreateAssignment()),
-                        icon: const Icon(Icons.add_circle_outline),
-                        label: const Text('Crear jornada'),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: current == null
+                              ? null
+                              : () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => CheckOutPage(
+                                        assignmentId:
+                                            current['id']?.toString() ?? '',
+                                      ),
+                                    ),
+                                  );
+                                },
+                          child: const Text('Check-Out'),
+                        ),
                       ),
                     ],
                   ),
-              ],
+
+                  const SizedBox(height: 16),
+
+                  // ── Crear jornada cuando no hay activa ─────────────────────
+                  if (current == null)
+                    Column(
+                      children: [
+                        const Text(
+                          'No se encontró un assignment activo para este conductor.\n'
+                          'Puedes crear una nueva jornada a continuación:',
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton.icon(
+                          onPressed: () => context
+                              .read<DashboardBloc>()
+                              .add(DashboardCreateAssignment()),
+                          icon: const Icon(Icons.add_circle_outline),
+                          label: const Text('Crear jornada'),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
             ),
           );
         },
