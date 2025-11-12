@@ -5,19 +5,31 @@ import '../../../core/network/dio_client.dart';
 class DriverService {
   final Dio _dio = DioClient.build();
 
+  // --- Auth/Profile ---
+  Future<Map<String, dynamic>?> getDriverProfile(String id) async {
+    try {
+      final r = await _dio.get('${ApiPaths.baseUrl}${ApiPaths.authProfileId(id)}');
+      final data = r.data;
+      return (data is Map) ? Map<String, dynamic>.from(data as Map) : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // --- Catálogos ---
   Future<Response> getDrivers() => _dio.get(ApiPaths.drivers);
   Future<Response> getVehicles() => _dio.get(ApiPaths.vehicles);
 
-  // ✅ PERFIL: /api/Auth/profile/{id}
-  Future<Map<String, dynamic>?> getDriverProfile(String id) async {
-    final res = await _dio.get(ApiPaths.authProfile(id));
-    if (res.statusCode == 200 && res.data is Map) {
-      return Map<String, dynamic>.from(res.data as Map);
-    }
-    return null;
+  // ✅ Crear driver en /api/Driver (cuerpo plano JSON)
+  Future<Response> createDriver(Map<String, dynamic> body) {
+    return _dio.post(
+      ApiPaths.drivers,
+      data: body,
+      options: Options(contentType: Headers.jsonContentType),
+    );
   }
 
-  // ✅ POST /api/Assignment  (sin wrapper "request")
+  // --- Assignment (cuerpo plano JSON, según Swagger) ---
   Future<Response> createAssignment({
     required String driverId,
     required String vehicleId,
@@ -35,22 +47,18 @@ class DriverService {
     );
   }
 
-  // PUT /api/Assignment/{id}/start (deja tu wrapper si el backend lo exige)
   Future<Response> putCheckIn(String assignmentId, Map<String, dynamic> body) {
-    final payload = body.containsKey('request') ? body : {'request': body};
     return _dio.put(
       ApiPaths.assignmentStart(assignmentId),
-      data: payload,
+      data: body,
       options: Options(contentType: Headers.jsonContentType),
     );
   }
 
-  // PUT /api/Assignment/{id}/complete
   Future<Response> putCheckOut(String assignmentId, Map<String, dynamic> body) {
-    final payload = body.containsKey('request') ? body : {'request': body};
     return _dio.put(
       ApiPaths.assignmentComplete(assignmentId),
-      data: payload,
+      data: body,
       options: Options(contentType: Headers.jsonContentType),
     );
   }
