@@ -4,14 +4,24 @@ class DriverRepository {
   final DriverService _service;
   DriverRepository(this._service);
 
+  Map<String, dynamic> _normalizeDriver(Map raw) {
+    final fullName = (raw['fullName'] ?? '${raw['firstName'] ?? ''} ${raw['lastName'] ?? ''}')
+        .toString()
+        .trim();
+    return {
+      'id': (raw['id'] ?? raw['code'] ?? '').toString(),
+      'fullName': fullName.isEmpty ? 'Conductor' : fullName,
+      'email': raw['email'],
+    };
+  }
+
+  bool _looksLikeGuid(String s) => RegExp(r'^[0-9a-fA-F-]{32,}$').hasMatch(s);
+
   Future<List<Map<String, dynamic>>> getDrivers() async {
     final r = await _service.getDrivers();
     final data = r.data;
     if (data is List) {
-      return data
-          .where((e) => e is Map)
-          .map((e) => Map<String, dynamic>.from(e as Map))
-          .toList();
+      return data.where((e) => e is Map).map((e) => _normalizeDriver(e as Map)).toList();
     }
     return <Map<String, dynamic>>[];
   }
@@ -20,49 +30,24 @@ class DriverRepository {
     final r = await _service.getVehicles();
     final data = r.data;
     if (data is List) {
-      return data
-          .where((e) => e is Map)
-          .map((e) => Map<String, dynamic>.from(e as Map))
-          .toList();
+      return data.where((e) => e is Map)
+                 .map((e) => Map<String, dynamic>.from(e as Map))
+                 .toList();
     }
     return <Map<String, dynamic>>[];
   }
 
-  // ✅ Perfil por id (Auth/profile/{id})
+  // ✅ Perfil por id (Auth/profile/{id}) con fallback a catálogo
   Future<Map<String, dynamic>?> getDriverProfile(String driverId) async {
     final json = await _service.getDriverProfile(driverId);
-    if (json == null) return null;
-
-    final fullName = (json['fullName'] ??
-            '${json['firstName'] ?? ''} ${json['lastName'] ?? ''}')
-        .toString()
-        .trim();
-
-    return {
-      'id': json['id']?.toString(),
-      'fullName': fullName.isEmpty ? 'Conductor' : fullName,
-      'email': json['email'],
-    };
+    if (json != null) return _normalizeDriver(json);
+    return await findDriverById(driverId);
   }
 
   Future<Map<String, dynamic>?> findDriverById(String id) async {
-    final p = await getDriverProfile(id);
-    if (p != null) return p;
-
     final list = await getDrivers();
     try {
-      final d = list.firstWhere(
-        (e) => (e['id']?.toString() ?? e['code']?.toString() ?? '') == id,
-      );
-      final fullName = (d['fullName'] ??
-              '${d['firstName'] ?? ''} ${d['lastName'] ?? ''}')
-          .toString()
-          .trim();
-      return {
-        'id': d['id']?.toString() ?? d['code']?.toString(),
-        'fullName': fullName.isEmpty ? 'Conductor' : fullName,
-        'email': d['email'],
-      };
+      return list.firstWhere((e) => (e['id'] ?? '').toString() == id);
     } catch (_) {
       return null;
     }
@@ -79,31 +64,64 @@ class DriverRepository {
     }
   }
 
+
+  // ✅ Si no existe el driver, lo crea automáticamente en /api/Driver
+    Future<Map<String, dynamic>> ensureDriverForEmail({
+      required String email,
+      String? fullName,
+    }) async {
+      final existing = await findDriverByEmail(email);
+      if (existing != null) return existing;
+
+      final parts = (fullName ?? '').trim().split(' ');
+      final firstName = parts.isNotEmpty ? parts.first : 'Conductor';
+      final lastName  = parts.length > 1 ? parts.sublist(1).join(' ') : '';
+
+      final payload = {
+        "code": "DRV-${DateTime.now().millisecondsSinceEpoch}",
+        "firstName": firstName,
+        "lastName": lastName,
+        "licenseNumber": "N/A",
+        "licenseExpiryDate": DateTime.now()
+            .add(const Duration(days: 365))
+            .toUtc()
+            .toIso8601String(),
+        "phone": "",
+        "email": email,
+        "experienceYears": 0
+      };
+
+      final r = await _service.createDriver(payload);
+      final data = r.data;
+      if (data is Map) return Map<String, dynamic>.from(data as Map);
+      throw Exception('No se pudo crear el driver para $email');
+    }
+
+
+
   Future<Map<String, dynamic>?> getFirstVehicle() async {
     final list = await getVehicles();
     return list.isNotEmpty ? list.first : null;
-    // si tu API devuelve ids como 'code', ajusta aquí
   }
 
-  // ✅ route como string (según Swagger)
   Future<Map<String, dynamic>?> createAssignment({
     required String driverId,
     required String vehicleId,
     required String route,
   }) async {
-    final r = await _service.createAssignment(
-      driverId: driverId,
-      vehicleId: vehicleId,
-      route: route,
-    );
+    if (!_looksLikeGuid(driverId)) {
+      throw Exception('driverId no es un GUID (usa el id de /api/Driver, no el numérico de Auth). Valor: $driverId');
+    }
+    if (!_looksLikeGuid(vehicleId)) {
+      throw Exception('vehicleId no es un GUID (usa el id de /api/Vehicle). Valor: $vehicleId');
+    }
+    final r = await _service.createAssignment(driverId: driverId, vehicleId: vehicleId, route: route);
     final data = r.data;
     return (data is Map) ? Map<String, dynamic>.from(data as Map) : null;
   }
 
   Future<List<Map<String, dynamic>>> getAssignmentsForDriver(String driverId) async {
-    // TODO: implementar GET real cuando el backend exponga filtro por driverId
-    final list = <Map<String, dynamic>>[];
-    return list.where((a) => (a['driverId']?.toString() ?? '') == driverId).toList();
+    return <Map<String, dynamic>>[];
   }
 
   Future<void> doCheckIn({required String assignmentId, required Map<String, dynamic> payload}) {
