@@ -2,21 +2,25 @@ class ApiPaths {
   static const String baseUrl =
       'https://underground-tuesday-renworkplace-1e2821cb.koyeb.app';
 
-  // Auth
-  static const String authLogin = '/api/Auth/login';
-  static const String authRegister = '/api/Auth/register';
-  static String authProfileId(String id) => '/api/Auth/profile/$id';
+  // ---------------- AUTH ----------------
+  static const String authLogin = '$baseUrl/api/Auth/login';
+  static const String authRegister = '$baseUrl/api/Auth/register';
 
-  // Alias (si tu código viejo usaba estos)
+  // ✅ PERFIL
+  static String authProfile(String id) => '$baseUrl/api/Auth/profile/$id';
+
+  // Alias (por compatibilidad)
   static const String login = authLogin;
   static const String register = authRegister;
 
-  // Driver & Vehicle (para búsquedas)
+  // ---------------- DRIVER & VEHICLE ----------------
   static const String drivers = '$baseUrl/api/Driver';
   static const String vehicles = '$baseUrl/api/Vehicle';
 
-  // Assignment (OJO: singular)
+  // ---------------- ASSIGNMENT ----------------
   static const String assignment = '$baseUrl/api/Assignment';
-  static String assignmentStart(String id) => '$baseUrl/api/Assignment/$id/start';
-  static String assignmentComplete(String id) => '$baseUrl/api/Assignment/$id/complete';
+  static String assignmentStart(String id) =>
+      '$baseUrl/api/Assignment/$id/start';
+  static String assignmentComplete(String id) =>
+      '$baseUrl/api/Assignment/$id/complete';
 }
