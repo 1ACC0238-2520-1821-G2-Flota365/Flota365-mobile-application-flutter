@@ -1,0 +1,26 @@
+import 'package:dio/dio.dart';
+import '../../../core/network/dio_client.dart';
+import '../../../core/constants/api_paths.dart';
+
+class AuthService {
+  final Dio _dio = DioClient.build();
+
+  Future<Response> loginRaw({
+    required String email,
+    required String password,
+  }) {
+    return _dio.post(
+      ApiPaths.login,
+      data: {'email': email, 'password': password},
+      options: Options(contentType: Headers.jsonContentType),
+    );
+  }
+
+  Future<Response> registerRaw(Map<String, dynamic> payload) {
+    return _dio.post(
+      ApiPaths.register,
+      data: payload,
+      options: Options(contentType: Headers.jsonContentType),
+    );
+  }
+}
