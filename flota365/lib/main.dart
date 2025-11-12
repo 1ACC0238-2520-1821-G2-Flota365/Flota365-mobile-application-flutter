@@ -1,3 +1,4 @@
+// lib/main.dart
 import 'package:flutter/material.dart';
 import 'core/ui/theme.dart';
 
@@ -9,6 +10,18 @@ import 'features/auth/presentation/pages/register_manager_page.dart';
 
 // Driver
 import 'features/driver/presentation/pages/dashboard_page.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+/// Rutas centralizadas
+class AppRoutes {
+  static const login = '/login';
+  static const role = '/role';
+  static const regDriver = '/register/driver';
+  static const regManager = '/register/manager';
+  static const managerHome = '/manager/home';
+  static const driverHome = '/driver/home'; // -> Dashboard del conductor
+}
 
 void main() {
   runApp(const FlotaApp());
@@ -23,32 +36,32 @@ class FlotaApp extends StatelessWidget {
       title: 'Flota365',
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
-      initialRoute: '/login',
+      navigatorKey: navigatorKey,
+
+      // Pantalla inicial
+      initialRoute: AppRoutes.login,
+
+      // Rutas sin argumentos
       routes: {
-        '/login': (_) => const LoginPage(),
-        '/role': (_) => const RolePickerPage(),
-        '/register/driver': (_) => const RegisterDriverPage(),
-        '/register/manager': (_) => const RegisterManagerPage(),
-        '/manager/home': (_) => const _Stub(title: 'Home Gestor'),
+        AppRoutes.login: (_) => const LoginPage(),
+        AppRoutes.role: (_) => const RolePickerPage(),
+        AppRoutes.regDriver: (_) => const RegisterDriverPage(),
+        AppRoutes.regManager: (_) => const RegisterManagerPage(),
+        AppRoutes.managerHome: (_) => const _Stub(title: 'Home Gestor'),
       },
 
-      // 🚀 Ruta dinámica con seguridad en argumentos
+      // Rutas con argumentos
       onGenerateRoute: (settings) {
-        if (settings.name == '/driver/home') {
+        if (settings.name == AppRoutes.driverHome) {
           final args = settings.arguments;
           String driverId = '';
-          String? fullName;
-          String? email;
 
-          if (args is Map) {
-            driverId = args['driverId']?.toString() ?? '';
-            fullName = args['fullName']?.toString();
-            email    = args['email']?.toString();
-          } else if (args is String) {
+          // Permitimos pasar solo el id (String) o un Map con 'driverId'
+          if (args is String) {
             driverId = args;
+          } else if (args is Map) {
+            driverId = args['driverId']?.toString() ?? '';
           }
-
-          debugPrint('🟢 /driver/home args => id=$driverId, fullName=$fullName, email=$email, type=${args.runtimeType}');
 
           return MaterialPageRoute(
             builder: (_) => DriverDashboardPage(driverId: driverId),
@@ -57,13 +70,15 @@ class FlotaApp extends StatelessWidget {
         return null;
       },
 
-
-
+      // fallback opcional (por si llega una ruta desconocida)
+      onUnknownRoute: (_) => MaterialPageRoute(
+        builder: (_) => const LoginPage(),
+      ),
     );
   }
 }
 
-// 🌐 Pantalla temporal para el gestor
+// Pantalla temporal para el gestor
 class _Stub extends StatelessWidget {
   final String title;
   const _Stub({super.key, required this.title});
@@ -81,7 +96,7 @@ class _Stub extends StatelessWidget {
             ElevatedButton(
               onPressed: () => Navigator.pushNamedAndRemoveUntil(
                 context,
-                '/login',
+                AppRoutes.login,
                 (_) => false,
               ),
               child: const Text('Cerrar sesión'),
