@@ -29,13 +29,13 @@ class DriverRepository {
     }
   }
 
-  // Primer vehículo (ajústalo si necesitas “disponible”)
+  // Primer vehículo 
   Future<Map<String, dynamic>?> getFirstVehicle() async {
     final list = await getVehicles();
     return list.isNotEmpty ? list.first : null;
   }
 
-  // Crear assignment (IDs siempre String)
+  // Crear assignment 
   Future<Map<String, dynamic>?> createAssignment({
     required dynamic driverId,
     required dynamic vehicleId,
@@ -50,12 +50,11 @@ class DriverRepository {
     return (data is Map) ? (data as Map).cast<String, dynamic>() : null;
   }
 
-  // Estos dos los usa tu BLoC para refrescar estados
+  
   Future<List<Map<String, dynamic>>> getAssignmentsForDriver(String driverId) async {
-    // Si el backend publica GET /api/Assignment?driverId=, cámbialo por esa llamada;
-    // de momento filtramos en cliente.
+    
     final list = <Map<String, dynamic>>[];
-    // si luego añades .getAssignments() global, úsalo aquí y filtra.
+    
     return list.where((a) => (a['driverId']?.toString() ?? '') == driverId).toList();
   }
 

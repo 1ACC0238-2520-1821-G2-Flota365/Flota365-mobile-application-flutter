@@ -1,7 +1,7 @@
 class RouteSummary {
   final String id;
-  final String code;     // ej. "RT-045"
-  final String status;   // "pendiente" | "en curso" | "completada"
+  final String code;    
+  final String status;   
 
   const RouteSummary({
     required this.id,

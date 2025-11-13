@@ -8,7 +8,7 @@ class DriverService {
   Future<Response> getDrivers() => _dio.get(ApiPaths.drivers);
   Future<Response> getVehicles() => _dio.get(ApiPaths.vehicles);
 
-  // POST /api/Assignment  ► el backend espera {"request": {...}}
+  
   Future<Response> createAssignment({
     required String driverId,
     required String vehicleId,
@@ -28,7 +28,7 @@ class DriverService {
     );
   }
 
-  // PUT /api/Assignment/{id}/start  ► también enviar como {"request": {...}} si tu backend lo pide
+  
   Future<Response> putCheckIn(String assignmentId, Map<String, dynamic> body) {
     final payload = body.containsKey('request') ? body : {'request': body};
     return _dio.put(
@@ -38,7 +38,7 @@ class DriverService {
     );
   }
 
-  // PUT /api/Assignment/{id}/complete
+  
   Future<Response> putCheckOut(String assignmentId, Map<String, dynamic> body) {
     final payload = body.containsKey('request') ? body : {'request': body};
     return _dio.put(
