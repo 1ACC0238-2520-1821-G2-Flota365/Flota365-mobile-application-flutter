@@ -23,4 +23,12 @@ class AuthService {
       options: Options(contentType: Headers.jsonContentType),
     );
   }
+    Future<Response> register(Map<String, dynamic> body) {
+    return _dio.post(
+      ApiPaths.authRegister,
+      data: body,
+      options: Options(contentType: Headers.jsonContentType),
+    );
+  }
+
 }

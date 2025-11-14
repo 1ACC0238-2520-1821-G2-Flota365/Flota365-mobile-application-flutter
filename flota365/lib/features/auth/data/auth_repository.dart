@@ -43,4 +43,20 @@ class AuthRepository {
     }
     return User.fromJson(res.data as Map<String, dynamic>);
   }
+    /// Registro directo con el payload EXACTO que pide tu backend
+  Future<Map<String, dynamic>?> registerRaw(Map<String, dynamic> payload) async {
+    try {
+      final res = await _service.register(payload);
+      final data = res.data;
+
+      if (data is Map) {
+        return Map<String, dynamic>.from(data);
+      }
+
+      return null;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 }
