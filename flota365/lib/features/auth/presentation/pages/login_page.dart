@@ -4,6 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/enums/status.dart';
 import '../../../../core/utils/validators.dart';
+
+// 🔥 IMPORTANTE PARA MAPEAR INT → GUID FALSO
+import 'package:flota365/core/helpers/driver_guid_mapper.dart';
+
 import '../../data/auth_repository.dart';
 import '../../data/auth_service.dart';
 import '../blocs/login_bloc.dart';
@@ -15,7 +19,6 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Inyección simple para empezar (luego lo movemos a DI global)
     final repo = AuthRepository(AuthService());
 
     return BlocProvider(
@@ -44,44 +47,64 @@ class _LoginViewState extends State<_LoginView> {
           constraints: const BoxConstraints(maxWidth: 420),
           child: Card(
             margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: BlocConsumer<LoginBloc, LoginState>(
-              listener: (context, state) {
-                if (state.status == Status.success && state.user != null) {
-                  final u = state.user!;
-                  final role = (u.role ?? '').toLowerCase();
+                listener: (context, state) async {
+                  if (state.status == Status.success && state.user != null) {
+                    final u = state.user!;
+                    final role = (u.role ?? '').toLowerCase();
 
-                  if (role == 'conductor' || role == 'driver') {
-                    // Enviamos SIEMPRE un mapa de argumentos (con claves consistentes)
-                    final args = {
-                      'driverId' : (u.id ?? '').toString(),
-                      'fullName' : (u.fullName ?? '').toString(),
-                      'email'    : (u.email ?? '').toString(),
-                    };
+                    // ============================================================
+                    // 🔥 1. DriverId entero → GUID Falso
+                    // ============================================================
+                    final intDriverId = (u.id ?? '').toString();
 
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      '/driver/home',
-                      (_) => false,
-                      arguments: args,
-                    );
-                  } else {
-                    Navigator.pushNamedAndRemoveUntil(context, '/manager/home', (_) => false);
+                    // Generamos un GUID falso estable, ej: drv-37
+                    final fakeGuid = "drv-$intDriverId";
+
+                    // Guardamos mapeo para reutilizarlo después
+                    await DriverGuidMapper.saveMapping(intDriverId, fakeGuid);
+
+                    final mappedGuid =
+                        await DriverGuidMapper.getGuid(intDriverId) ??
+                            fakeGuid;
+                    // ============================================================
+
+                    if (role == 'conductor' || role == 'driver') {
+                      final args = {
+                        'driverId': mappedGuid, // ← usamos GUID falso
+                        'realId': intDriverId, // ← guardamos el INT también
+                        'fullName': (u.fullName ?? '').toString(),
+                        'email': (u.email ?? '').toString(),
+                      };
+
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/driver/home',
+                        (_) => false,
+                        arguments: args,
+                      );
+                    } else {
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/manager/home',
+                        (_) => false,
+                      );
+                    }
                   }
 
-                }
-
-                if (state.status == Status.failure && state.error != null) {
-                  ScaffoldMessenger.of(context)
-                    ..hideCurrentSnackBar()
-                    ..showSnackBar(SnackBar(content: Text(state.error!)));
-                }
-              },
-
-
-
+                  if (state.status == Status.failure && state.error != null) {
+                    ScaffoldMessenger.of(context)
+                      ..hideCurrentSnackBar()
+                      ..showSnackBar(
+                        SnackBar(content: Text(state.error!)),
+                      );
+                  }
+                },
                 builder: (context, state) {
                   final bloc = context.read<LoginBloc>();
                   final loading = state.status == Status.loading;
@@ -93,7 +116,8 @@ class _LoginViewState extends State<_LoginView> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         const SizedBox(height: 8),
-                        Text('Flota365', style: Theme.of(context).textTheme.headlineSmall),
+                        Text('Flota365',
+                            style: Theme.of(context).textTheme.headlineSmall),
                         const SizedBox(height: 4),
                         Text(
                           'Inicia sesión para continuar',
@@ -103,10 +127,12 @@ class _LoginViewState extends State<_LoginView> {
 
                         // Email
                         TextFormField(
-                          decoration: const InputDecoration(labelText: 'Email'),
+                          decoration:
+                              const InputDecoration(labelText: 'Email'),
                           keyboardType: TextInputType.emailAddress,
                           validator: Validators.email,
-                          onChanged: (v) => bloc.add(LoginEmailChanged(v)),
+                          onChanged: (v) =>
+                              bloc.add(LoginEmailChanged(v)),
                         ),
                         const SizedBox(height: 12),
 
@@ -115,13 +141,17 @@ class _LoginViewState extends State<_LoginView> {
                           decoration: InputDecoration(
                             labelText: 'Contraseña',
                             suffixIcon: IconButton(
-                              icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
-                              onPressed: () => setState(() => _obscure = !_obscure),
+                              icon: Icon(_obscure
+                                  ? Icons.visibility
+                                  : Icons.visibility_off),
+                              onPressed: () =>
+                                  setState(() => _obscure = !_obscure),
                             ),
                           ),
                           obscureText: _obscure,
                           validator: (v) => Validators.password(v, min: 6),
-                          onChanged: (v) => bloc.add(LoginPasswordChanged(v)),
+                          onChanged: (v) =>
+                              bloc.add(LoginPasswordChanged(v)),
                         ),
                         const SizedBox(height: 16),
 
@@ -140,7 +170,8 @@ class _LoginViewState extends State<_LoginView> {
                                 ? const SizedBox(
                                     width: 20,
                                     height: 20,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2),
                                   )
                                 : const Text('Iniciar sesión'),
                           ),
@@ -149,10 +180,10 @@ class _LoginViewState extends State<_LoginView> {
                         const SizedBox(height: 10),
                         TextButton(
                           onPressed: () {
-                            // Selector de rol para registro
                             Navigator.pushNamed(context, '/role');
                           },
-                          child: const Text('¿No tienes cuenta? Regístrate'),
+                          child:
+                              const Text('¿No tienes cuenta? Regístrate'),
                         ),
                       ],
                     ),

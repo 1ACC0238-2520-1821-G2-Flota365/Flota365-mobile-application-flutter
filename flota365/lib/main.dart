@@ -1,4 +1,5 @@
 // lib/main.dart
+import 'package:flota365/features/driver/presentation/pages/history_page.dart';
 import 'package:flota365/features/driver/presentation/pages/route_detail_page.dart';
 import 'package:flota365/features/driver/presentation/pages/routes_page.dart';
 import 'package:flutter/material.dart';
@@ -58,6 +59,12 @@ class FlotaApp extends StatelessWidget {
           final id = ModalRoute.of(context)!.settings.arguments as String;
           return RouteDetailPage(routeId: id); // 🔥 CORREGIDO
         },
+
+        '/history': (context) {
+            final driverId = ModalRoute.of(context)!.settings.arguments as String;
+            return HistoryPage(driverId: driverId);
+          },
+
       },
 
       onGenerateRoute: (settings) {
