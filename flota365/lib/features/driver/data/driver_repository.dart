@@ -155,4 +155,6 @@ class DriverRepository {
   Future<void> doCheckOut({required String assignmentId, required Map<String, dynamic> payload}) {
     return _service.putCheckOut(assignmentId, payload);
   }
+
+  
 }
