@@ -10,7 +10,7 @@ class AuthService {
     required String password,
   }) {
     return _dio.post(
-      ApiPaths.login,
+      ApiPaths.authLogin,
       data: {'email': email, 'password': password},
       options: Options(contentType: Headers.jsonContentType),
     );
@@ -18,7 +18,7 @@ class AuthService {
 
   Future<Response> registerRaw(Map<String, dynamic> payload) {
     return _dio.post(
-      ApiPaths.register,
+      ApiPaths.authRegister,
       data: payload,
       options: Options(contentType: Headers.jsonContentType),
     );

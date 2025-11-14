@@ -1,8 +1,9 @@
 class ApiPaths {
+  // Base URL del backend
   static const String baseUrl =
       'https://underground-tuesday-renworkplace-1e2821cb.koyeb.app';
 
-  // Auth
+  // --- Auth ---
   static const String authLogin = '/api/Auth/login';
   static const String authRegister = '/api/Auth/register';
   static String authProfileId(String id) => '/api/Auth/profile/$id';
@@ -11,9 +12,8 @@ class ApiPaths {
   static const String login = authLogin;
   static const String register = authRegister;
 
-  // Driver & Vehicle (para búsquedas)
-  static const String drivers = '$baseUrl/api/Driver';
-  static const String vehicles = '$baseUrl/api/Vehicle';
+  // --- Vehicles ---
+  static const String vehicles = '/api/Vehicle';
 
   // Assignment 
   static const String assignment = '$baseUrl/api/Assignment';

@@ -5,7 +5,21 @@ import '../../../core/network/dio_client.dart';
 class DriverService {
   final Dio _dio = DioClient.build();
 
+  // --- Auth/Profile ---
+  Future<Map<String, dynamic>?> getDriverProfile(String id) async {
+    try {
+      final r = await _dio.get(ApiPaths.authProfileId(id));
+      final data = r.data;
+      return (data is Map) ? Map<String, dynamic>.from(data) : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // --- Drivers ---
   Future<Response> getDrivers() => _dio.get(ApiPaths.drivers);
+
+  // --- Vehicles ---
   Future<Response> getVehicles() => _dio.get(ApiPaths.vehicles);
 
   
@@ -15,12 +29,11 @@ class DriverService {
     required String route,
   }) {
     final payload = {
-      'request': {
-        'driverId': driverId,
-        'vehicleId': vehicleId,
-        'route': route,
-      }
+      'driverId': driverId,
+      'vehicleId': vehicleId,
+      'route': route,
     };
+
     return _dio.post(
       ApiPaths.assignment,
       data: payload,
@@ -30,21 +43,22 @@ class DriverService {
 
   
   Future<Response> putCheckIn(String assignmentId, Map<String, dynamic> body) {
-    final payload = body.containsKey('request') ? body : {'request': body};
     return _dio.put(
       ApiPaths.assignmentStart(assignmentId),
-      data: payload,
+      data: body,
       options: Options(contentType: Headers.jsonContentType),
     );
   }
 
   
   Future<Response> putCheckOut(String assignmentId, Map<String, dynamic> body) {
-    final payload = body.containsKey('request') ? body : {'request': body};
     return _dio.put(
       ApiPaths.assignmentComplete(assignmentId),
-      data: payload,
+      data: body,
       options: Options(contentType: Headers.jsonContentType),
     );
   }
+
+
+  
 }

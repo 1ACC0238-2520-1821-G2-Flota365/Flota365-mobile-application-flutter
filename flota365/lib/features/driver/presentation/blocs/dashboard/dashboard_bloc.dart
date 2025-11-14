@@ -1,12 +1,14 @@
-// features/driver/presentation/blocs/dashboard/dashboard_bloc.dart
-import 'package:flota365/core/enums/status.dart';
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flota365/core/enums/status.dart';
+
 import '../../../data/driver_repository.dart';
 import 'dashboard_event.dart';
 import 'dashboard_state.dart';
 
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final DriverRepository repo;
+
   DashboardBloc(this.repo) : super(const DashboardState()) {
     on<DashboardStarted>(_onStarted);
     on<DashboardCreateAssignment>(_onCreate);
@@ -17,7 +19,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     Emitter<DashboardState> emit,
   ) async {
     try {
-      final driverId = e.driverId.toString(); // 🔒 forzamos String
+      final driverId = e.driverId.toString();
       emit(state.copyWith(status: Status.loading, driverId: driverId));
 
       
@@ -59,10 +61,14 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         throw Exception('Email de perfil no disponible');
       }
 
-      // 2) Buscar driver por email
-      final driver = await repo.findDriverByEmail(email);
-      if (driver == null) {
-        throw Exception('No se encontró un driver para el email $email');
+      // 2) Asegurar driver en /api/Driver (buscar por email y crear si no existe)
+      final ensuredDriver = await repo.ensureDriverForEmail(
+        email: email,
+        fullName: state.profile?['fullName'],
+      );
+      final driverGuid = (ensuredDriver['id'] ?? '').toString();
+      if (driverGuid.isEmpty) {
+        throw Exception('El driver resuelto no tiene un id válido (GUID)');
       }
 
       final driverId = driver['id']?.toString() ?? driver['code']?.toString() ?? '';
@@ -71,17 +77,20 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       
       final vehicle = await repo.getFirstVehicle();
       if (vehicle == null) throw Exception('No hay vehículos disponibles');
+      final vehicleGuid = (vehicle['id'] ?? vehicle['code'] ?? '').toString();
+      if (vehicleGuid.isEmpty) {
+        throw Exception('El vehículo no tiene un id válido (GUID/code)');
+      }
 
       final vehicleId = vehicle['id']?.toString() ?? vehicle['code']?.toString() ?? '';
       if (vehicleId.isEmpty) throw Exception('El vehículo no tiene un id válido');
 
     
       final created = await repo.createAssignment(
-        driverId: driverId,
-        vehicleId: vehicleId,
+        driverId: driverGuid,
+        vehicleId: vehicleGuid,
         route: 'Ruta-Automática',
       );
-
       if (created == null) {
         throw Exception('El backend no devolvió el assignment creado');
       }
