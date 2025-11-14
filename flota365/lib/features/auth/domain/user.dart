@@ -1,5 +1,5 @@
 class User {
-  final String id;        // como String
+  final String id;       
   final String fullName;
   final String email;
   final String role;

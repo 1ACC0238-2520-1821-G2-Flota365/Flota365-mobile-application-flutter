@@ -14,7 +14,7 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Inyección simple para empezar (luego lo movemos a DI global)
+    
     final repo = AuthRepository(AuthService());
 
     return BlocProvider(

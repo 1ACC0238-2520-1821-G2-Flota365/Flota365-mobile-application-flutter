@@ -32,12 +32,12 @@ class FlotaApp extends StatelessWidget {
         '/manager/home': (_) => const _Stub(title: 'Home Gestor'),
       },
 
-      // 🚀 Ruta dinámica con seguridad en argumentos
+      
       onGenerateRoute: (settings) {
         if (settings.name == '/driver/home') {
-          // Lee los argumentos sin castear
+          
           final driverId = settings.arguments?.toString() ?? '';
-          debugPrint('🟢 Argumento recibido en /driver/home: $driverId');
+          debugPrint(' Argumento recibido en /driver/home: $driverId');
           return MaterialPageRoute(
             builder: (_) => DriverDashboardPage(driverId: driverId),
           );
@@ -48,7 +48,7 @@ class FlotaApp extends StatelessWidget {
   }
 }
 
-// 🌐 Pantalla temporal para el gestor
+
 class _Stub extends StatelessWidget {
   final String title;
   const _Stub({super.key, required this.title});
