@@ -67,17 +67,12 @@ class FlotaApp extends StatelessWidget {
 
       },
 
+      
       onGenerateRoute: (settings) {
-        if (settings.name == AppRoutes.driverHome) {
-          final args = settings.arguments;
-          String driverId = '';
-
-          if (args is String) {
-            driverId = args;
-          } else if (args is Map) {
-            driverId = args['driverId']?.toString() ?? '';
-          }
-
+        if (settings.name == '/driver/home') {
+          
+          final driverId = settings.arguments?.toString() ?? '';
+          debugPrint(' Argumento recibido en /driver/home: $driverId');
           return MaterialPageRoute(
             builder: (_) => DriverDashboardPage(driverId: driverId),
           );
@@ -91,6 +86,7 @@ class FlotaApp extends StatelessWidget {
     );
   }
 }
+
 
 class _Stub extends StatelessWidget {
   final String title;

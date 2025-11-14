@@ -1,8 +1,8 @@
 class User {
-  final String? id;
-  final String? fullName;
-  final String? email;
-  final String? role;
+  final String id;       
+  final String fullName;
+  final String email;
+  final String role;
 
   const User({this.id, this.fullName, this.email, this.role});
 
