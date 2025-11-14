@@ -1,4 +1,4 @@
-import 'package:flota365/features/driver/data/dtos/local_route_service.dart';
+import 'package:flota365/features/driver/data/dtos/local/local_route_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'routes_event.dart';
 import 'routes_state.dart';
