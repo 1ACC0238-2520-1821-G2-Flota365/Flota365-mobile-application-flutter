@@ -1,13 +1,18 @@
 // lib/features/driver/presentation/pages/dashboard_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../../core/enums/status.dart';
-import '../../../../main.dart' show AppRoutes; // usamos AppRoutes.driverHome
+import '../../../../features/driver/presentation/widgets/custom_drawer.dart'; // <-- IMPORTANTE
+import '../../../../main.dart' show AppRoutes;
+
 import '../../data/driver_repository.dart';
 import '../../data/driver_service.dart';
 import '../blocs/dashboard/dashboard_bloc.dart';
 import '../blocs/dashboard/dashboard_event.dart';
 import '../blocs/dashboard/dashboard_state.dart';
+
 import 'checkin_page.dart';
 import 'checkout_page.dart';
 
@@ -29,12 +34,10 @@ class _DashboardView extends StatelessWidget {
   const _DashboardView();
 
   void _goDashboardHome(BuildContext context, {required String driverId}) {
-    // Ir SIEMPRE al dashboard del conductor, sin cerrar sesión ni pasar por /role
     Navigator.pushNamedAndRemoveUntil(
       context,
       AppRoutes.driverHome,
       (_) => false,
-      // Puedes enviar solo el id (String) o un Map. Tu onGenerateRoute soporta ambos.
       arguments: {'driverId': driverId},
     );
   }
@@ -46,10 +49,9 @@ class _DashboardView extends StatelessWidget {
         return WillPopScope(
           onWillPop: () async {
             _goDashboardHome(context, driverId: state.driverId);
-            return false; // bloquea el pop por defecto
+            return false;
           },
           child: Scaffold(
-            // Mantiene el leading automático (icono de Drawer)
             appBar: AppBar(
               title: const Text('Flota365 - Conductor'),
               actions: [
@@ -63,29 +65,36 @@ class _DashboardView extends StatelessWidget {
                 ),
               ],
             ),
-            drawer: Drawer(
-              child: ListView(
-                children: [
-                  const DrawerHeader(child: Text('Menú')),
-                  ListTile(
-                    leading: const Icon(Icons.home_outlined),
-                    title: const Text('Inicio'),
-                    onTap: () => _goDashboardHome(
-                      context,
-                      driverId: state.driverId,
-                    ),
-                  ),
-                  const ListTile(
-                    leading: Icon(Icons.route),
-                    title: Text('Rutas'),
-                  ),
-                  const ListTile(
-                    leading: Icon(Icons.history),
-                    title: Text('Historial'),
-                  ),
-                ],
+
+            // 🔥 REEMPLAZAMOS TU DRAWER POR ESTE NUEVO
+            drawer: CustomDrawer(
+              onHome: () => _goDashboardHome(
+                context,
+                driverId: state.driverId,
               ),
+              onRoutes: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/routes',
+                      arguments: state.driverId,
+                    );
+                  },
+
+
+              onHistory: () {
+                Navigator.pushNamed(context, '/history');
+              },
+              onNotifications: () {
+                Navigator.pushNamed(context, '/notifications');
+              },
+              onSupport: () {
+                Navigator.pushNamed(context, '/support');
+              },
+              onLogout: () {
+                Navigator.pushReplacementNamed(context, '/login');
+              },
             ),
+
             body: _DashboardBody(state: state),
           ),
         );
