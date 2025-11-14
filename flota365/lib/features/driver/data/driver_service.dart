@@ -8,19 +8,21 @@ class DriverService {
   // --- Auth/Profile ---
   Future<Map<String, dynamic>?> getDriverProfile(String id) async {
     try {
-      final r = await _dio.get('${ApiPaths.baseUrl}${ApiPaths.authProfileId(id)}');
+      final r = await _dio.get(ApiPaths.authProfileId(id));
       final data = r.data;
-      return (data is Map) ? Map<String, dynamic>.from(data as Map) : null;
+      return (data is Map) ? Map<String, dynamic>.from(data) : null;
     } catch (_) {
       return null;
     }
   }
 
-  // --- Catálogos ---
+  // --- Drivers ---
   Future<Response> getDrivers() => _dio.get(ApiPaths.drivers);
+
+  // --- Vehicles ---
   Future<Response> getVehicles() => _dio.get(ApiPaths.vehicles);
 
-  // ✅ Crear driver en /api/Driver (cuerpo plano JSON)
+  // --- Crear Driver ---
   Future<Response> createDriver(Map<String, dynamic> body) {
     return _dio.post(
       ApiPaths.drivers,
@@ -29,7 +31,7 @@ class DriverService {
     );
   }
 
-  // --- Assignment (cuerpo plano JSON, según Swagger) ---
+  // --- Assignment ---
   Future<Response> createAssignment({
     required String driverId,
     required String vehicleId,
@@ -40,6 +42,7 @@ class DriverService {
       'vehicleId': vehicleId,
       'route': route,
     };
+
     return _dio.post(
       ApiPaths.assignment,
       data: payload,
@@ -47,6 +50,17 @@ class DriverService {
     );
   }
 
+  // GET ALL ASSIGNMENTS
+  Future<Response> getAssignments() {
+    return _dio.get(ApiPaths.assignment);
+  }
+
+  // GET ASSIGNMENT DETAIL
+  Future<Response> getAssignmentById(String id) {
+    return _dio.get(ApiPaths.assignmentById(id));
+  }
+
+  // CHECK-IN
   Future<Response> putCheckIn(String assignmentId, Map<String, dynamic> body) {
     return _dio.put(
       ApiPaths.assignmentStart(assignmentId),
@@ -55,6 +69,7 @@ class DriverService {
     );
   }
 
+  // CHECK-OUT
   Future<Response> putCheckOut(String assignmentId, Map<String, dynamic> body) {
     return _dio.put(
       ApiPaths.assignmentComplete(assignmentId),

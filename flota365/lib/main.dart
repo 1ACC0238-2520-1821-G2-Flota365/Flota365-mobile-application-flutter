@@ -1,4 +1,6 @@
 // lib/main.dart
+import 'package:flota365/features/driver/presentation/pages/route_detail_page.dart';
+import 'package:flota365/features/driver/presentation/pages/routes_page.dart';
 import 'package:flutter/material.dart';
 import 'core/ui/theme.dart';
 
@@ -13,14 +15,13 @@ import 'features/driver/presentation/pages/dashboard_page.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-/// Rutas centralizadas
 class AppRoutes {
   static const login = '/login';
   static const role = '/role';
   static const regDriver = '/register/driver';
   static const regManager = '/register/manager';
   static const managerHome = '/manager/home';
-  static const driverHome = '/driver/home'; // -> Dashboard del conductor
+  static const driverHome = '/driver/home';
 }
 
 void main() {
@@ -37,26 +38,33 @@ class FlotaApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
       navigatorKey: navigatorKey,
-
-      // Pantalla inicial
       initialRoute: AppRoutes.login,
 
-      // Rutas sin argumentos
       routes: {
         AppRoutes.login: (_) => const LoginPage(),
         AppRoutes.role: (_) => const RolePickerPage(),
         AppRoutes.regDriver: (_) => const RegisterDriverPage(),
         AppRoutes.regManager: (_) => const RegisterManagerPage(),
         AppRoutes.managerHome: (_) => const _Stub(title: 'Home Gestor'),
+
+        // 🔵 LISTA DE RUTAS (MOCK)
+        '/routes': (context) {
+          final driverId = ModalRoute.of(context)!.settings.arguments as String;
+          return RoutesPage(driverId: driverId);
+        },
+
+        // 🔵 DETALLE DE RUTA (MOCK)
+        '/route-detail': (context) {
+          final id = ModalRoute.of(context)!.settings.arguments as String;
+          return RouteDetailPage(routeId: id); // 🔥 CORREGIDO
+        },
       },
 
-      // Rutas con argumentos
       onGenerateRoute: (settings) {
         if (settings.name == AppRoutes.driverHome) {
           final args = settings.arguments;
           String driverId = '';
 
-          // Permitimos pasar solo el id (String) o un Map con 'driverId'
           if (args is String) {
             driverId = args;
           } else if (args is Map) {
@@ -70,7 +78,6 @@ class FlotaApp extends StatelessWidget {
         return null;
       },
 
-      // fallback opcional (por si llega una ruta desconocida)
       onUnknownRoute: (_) => MaterialPageRoute(
         builder: (_) => const LoginPage(),
       ),
@@ -78,7 +85,6 @@ class FlotaApp extends StatelessWidget {
   }
 }
 
-// Pantalla temporal para el gestor
 class _Stub extends StatelessWidget {
   final String title;
   const _Stub({super.key, required this.title});

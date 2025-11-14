@@ -26,6 +26,34 @@ class DriverRepository {
     return <Map<String, dynamic>>[];
   }
 
+
+  Future<List<Map<String, dynamic>>> getAssignmentsForDriver(String driverId) async {
+      final r = await _service.getAssignments();
+      final data = r.data;
+
+      if (data is List) {
+        final list = data
+            .where((e) => e is Map)
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
+
+        // Filtrar por driverId
+        return list.where((e) => e['driverId']?.toString() == driverId).toList();
+      }
+
+      return [];
+    }
+    Future<Map<String, dynamic>?> getAssignmentDetail(String id) async {
+      final r = await _service.getAssignmentById(id);
+      final data = r.data;
+
+      if (data is Map) return Map<String, dynamic>.from(data);
+
+      return null;
+    }
+
+
+
   Future<List<Map<String, dynamic>>> getVehicles() async {
     final r = await _service.getVehicles();
     final data = r.data;
@@ -118,10 +146,6 @@ class DriverRepository {
     final r = await _service.createAssignment(driverId: driverId, vehicleId: vehicleId, route: route);
     final data = r.data;
     return (data is Map) ? Map<String, dynamic>.from(data as Map) : null;
-  }
-
-  Future<List<Map<String, dynamic>>> getAssignmentsForDriver(String driverId) async {
-    return <Map<String, dynamic>>[];
   }
 
   Future<void> doCheckIn({required String assignmentId, required Map<String, dynamic> payload}) {
