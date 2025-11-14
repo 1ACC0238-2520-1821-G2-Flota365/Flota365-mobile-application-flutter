@@ -1,4 +1,5 @@
 class ApiPaths {
+  // Base URL del backend
   static const String baseUrl =
       'https://underground-tuesday-renworkplace-1e2821cb.koyeb.app';
 
@@ -7,12 +8,15 @@ class ApiPaths {
   static const String authRegister = '/api/Auth/register';
   static String authProfileId(String id) => '/api/Auth/profile/$id';
 
-  // --- Driver & Vehicle ---
-  static const String drivers  = '$baseUrl/api/Driver';
-  static const String vehicles = '$baseUrl/api/Vehicle';
+  // --- Drivers ---
+  static const String drivers = '/api/Driver';
 
-  // --- Assignment ---
-  static const String assignment = '$baseUrl/api/Assignment';
-  static String assignmentStart(String id)    => '$baseUrl/api/Assignment/$id/start';
-  static String assignmentComplete(String id) => '$baseUrl/api/Assignment/$id/complete';
+  // --- Vehicles ---
+  static const String vehicles = '/api/Vehicle';
+
+  // --- Assignments ---
+  static const String assignment = '/api/Assignment';
+  static String assignmentById(String id) => '/api/Assignment/$id';
+  static String assignmentStart(String id) => '/api/Assignment/$id/start';
+  static String assignmentComplete(String id) => '/api/Assignment/$id/complete';
 }
