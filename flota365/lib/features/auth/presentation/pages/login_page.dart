@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/enums/status.dart';
 import '../../../../core/utils/validators.dart';
 
-// 🔥 IMPORTANTE PARA MAPEAR INT → GUID FALSO
+
 import 'package:flota365/core/helpers/driver_guid_mapper.dart';
 
 import '../../data/auth_repository.dart';
@@ -19,6 +19,7 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     final repo = AuthRepository(AuthService());
 
     return BlocProvider(
