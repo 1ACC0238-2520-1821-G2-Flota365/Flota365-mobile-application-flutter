@@ -1,5 +1,3 @@
-// lib/features/driver/presentation/pages/dashboard_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -66,42 +64,41 @@ class _DashboardView extends StatelessWidget {
               ],
             ),
 
-            // 🔥 REEMPLAZAMOS TU DRAWER POR ESTE NUEVO
             drawer: CustomDrawer(
-              onHome: () => _goDashboardHome(
-                context,
-                driverId: state.driverId,
+                onHome: () => _goDashboardHome(
+                  context,
+                  driverId: state.driverId,
+                ),
+
+                onRoutes: () {
+                  Navigator.pushNamed(context, '/routes', arguments: state.driverId);
+                },
+
+                onHistory: () {
+                  Navigator.pushNamed(context, '/history', arguments: state.driverId);
+                },
+
+                onNotifications: () {
+                  Navigator.pushNamed(context, '/notifications');
+                },
+
+                onSupport: () {
+                  Navigator.pushNamed(context, '/support');
+                },
+
+                onLogout: () {
+                  Navigator.pushReplacementNamed(context, '/login');
+                },
               ),
-              onRoutes: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/routes',
-                      arguments: state.driverId,
-                    );
-                  },
 
 
-              onHistory: () {
-                Navigator.pushNamed(context, '/history');
-              },
-              onNotifications: () {
-                Navigator.pushNamed(context, '/notifications');
-              },
-              onSupport: () {
-                Navigator.pushNamed(context, '/support');
-              },
-              onLogout: () {
-                Navigator.pushReplacementNamed(context, '/login');
-              },
-            ),
-
-            body: _DashboardBody(state: state),
-          ),
-        );
-      },
-    );
-  }
-}
+                          body: _DashboardBody(state: state),
+                        ),
+                      );
+                    },
+                  );
+                }
+              }
 
 class _DashboardBody extends StatelessWidget {
   final DashboardState state;

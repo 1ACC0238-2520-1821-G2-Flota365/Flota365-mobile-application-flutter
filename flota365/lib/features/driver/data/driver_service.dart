@@ -22,7 +22,16 @@ class DriverService {
   // --- Vehicles ---
   Future<Response> getVehicles() => _dio.get(ApiPaths.vehicles);
 
-  
+  // --- Crear Driver ---
+  Future<Response> createDriver(Map<String, dynamic> body) {
+    return _dio.post(
+      ApiPaths.drivers,
+      data: body,
+      options: Options(contentType: Headers.jsonContentType),
+    );
+  }
+
+  // --- Assignment ---
   Future<Response> createAssignment({
     required String driverId,
     required String vehicleId,
@@ -41,7 +50,17 @@ class DriverService {
     );
   }
 
-  
+  // GET ALL ASSIGNMENTS
+  Future<Response> getAssignments() {
+    return _dio.get(ApiPaths.assignment);
+  }
+
+  // GET ASSIGNMENT DETAIL
+  Future<Response> getAssignmentById(String id) {
+    return _dio.get(ApiPaths.assignmentById(id));
+  }
+
+  // CHECK-IN
   Future<Response> putCheckIn(String assignmentId, Map<String, dynamic> body) {
     return _dio.put(
       ApiPaths.assignmentStart(assignmentId),
@@ -50,7 +69,7 @@ class DriverService {
     );
   }
 
-  
+  // CHECK-OUT
   Future<Response> putCheckOut(String assignmentId, Map<String, dynamic> body) {
     return _dio.put(
       ApiPaths.assignmentComplete(assignmentId),

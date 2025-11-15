@@ -1,4 +1,3 @@
-// lib/core/ui/theme.dart
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
@@ -26,6 +25,7 @@ ThemeData buildAppTheme() {
   );
 
   return base.copyWith(
+ 
     appBarTheme: AppBarTheme(
       backgroundColor: AppColors.primaryWhite,
       foregroundColor: AppColors.textBlack,
@@ -37,6 +37,7 @@ ThemeData buildAppTheme() {
         fontSize: 18,
       ),
     ),
+
     
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -49,6 +50,7 @@ ThemeData buildAppTheme() {
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
       ),
     ),
+
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.textBlack,
@@ -57,9 +59,13 @@ ThemeData buildAppTheme() {
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
       ),
     ),
+
+   
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: AppColors.gray1.withOpacity(.35),
+
+      
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.gray1),
@@ -72,31 +78,72 @@ ThemeData buildAppTheme() {
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.primaryBlue, width: 2),
       ),
-      labelStyle: const TextStyle(color: AppColors.gray2),
+
+      // Labels y hints
+      hintStyle: const TextStyle(
+        color: AppColors.gray2,
+      ),
+      labelStyle: const TextStyle(
+        color: AppColors.gray2,
+      ),
+
+      // Iconos
+      prefixIconColor: AppColors.textBlack,
+      suffixIconColor: AppColors.textBlack,
     ),
+
+    // -------------------------
+    // CHIP
+    // -------------------------
     chipTheme: ChipThemeData(
       backgroundColor: AppColors.secondaryYellow3,
       selectedColor: AppColors.secondaryGreen1,
       disabledColor: AppColors.gray1,
       labelStyle: const TextStyle(color: AppColors.textBlack),
     ),
-    textTheme: const TextTheme(
-      headlineSmall: TextStyle(fontWeight: FontWeight.w700, fontSize: 22, color: AppColors.textBlack),
-      titleMedium: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: AppColors.textBlack),
-      bodyMedium: TextStyle(fontSize: 14, color: AppColors.textBlack),
-      bodySmall: TextStyle(fontSize: 12, color: AppColors.gray2),
-      labelLarge: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textBlack),
-    ),
-    dividerColor: AppColors.gray1,
-    progressIndicatorTheme: const ProgressIndicatorThemeData(color: AppColors.primaryBlue),
 
-    // ⬇️ AQUÍ EL CAMBIO: usar MaterialStateProperty*
+   
+    textTheme: const TextTheme(
+      bodyMedium: TextStyle(                       
+        color: AppColors.textBlack,
+        fontSize: 16,
+      ),
+      bodySmall: TextStyle(
+        fontSize: 12,
+        color: AppColors.gray2,
+      ),
+      titleMedium: TextStyle(
+        fontWeight: FontWeight.w600,
+        fontSize: 16,
+        color: AppColors.textBlack,
+      ),
+      headlineSmall: TextStyle(
+        fontWeight: FontWeight.w700,
+        fontSize: 22,
+        color: AppColors.textBlack,
+      ),
+      labelLarge: TextStyle(
+        fontWeight: FontWeight.w600,
+        color: AppColors.textBlack,
+      ),
+    ),
+
+  
+    dividerColor: AppColors.gray1,
+    progressIndicatorTheme:
+        const ProgressIndicatorThemeData(color: AppColors.primaryBlue),
+
+  
     switchTheme: SwitchThemeData(
       thumbIcon: MaterialStateProperty.resolveWith<Icon?>((states) {
-        return states.contains(MaterialState.selected) ? const Icon(Icons.check) : const Icon(Icons.close);
+        return states.contains(MaterialState.selected)
+            ? const Icon(Icons.check)
+            : const Icon(Icons.close);
       }),
       thumbColor: MaterialStateProperty.resolveWith<Color?>((states) {
-        return states.contains(MaterialState.selected) ? AppColors.secondaryGreen1 : AppColors.gray2;
+        return states.contains(MaterialState.selected)
+            ? AppColors.secondaryGreen1
+            : AppColors.gray2;
       }),
       trackColor: const MaterialStatePropertyAll<Color>(AppColors.gray1),
     ),

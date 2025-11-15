@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../../core/utils/validators.dart';
+import 'package:flota365/core/utils/validators.dart';
+
+import '../../../auth/data/auth_repository.dart';
+import '../../../auth/data/auth_service.dart';
+import '../../../driver/data/driver_repository.dart';
+import '../../../driver/data/driver_service.dart';
 
 class RegisterDriverPage extends StatefulWidget {
   const RegisterDriverPage({super.key});
@@ -10,40 +15,103 @@ class RegisterDriverPage extends StatefulWidget {
 
 class _RegisterDriverPageState extends State<RegisterDriverPage> {
   final _formKey = GlobalKey<FormState>();
+
   final name = TextEditingController();
-  final birth = TextEditingController();
-  final licenseType = TextEditingController();
-  final licenseNumber = TextEditingController();
-  final experience = TextEditingController();
   final email = TextEditingController();
   final pass = TextEditingController();
+  final licenseNumber = TextEditingController();
+  final experience = TextEditingController();
+
   bool obscure = true;
   bool loading = false;
   bool acceptTerms = false;
 
+  final authRepo = AuthRepository(AuthService());
+  final driverRepo = DriverRepository(DriverService());
+
   @override
   void dispose() {
-    name.dispose(); birth.dispose(); licenseType.dispose();
-    licenseNumber.dispose(); experience.dispose(); email.dispose(); pass.dispose();
+    name.dispose();
+    email.dispose();
+    pass.dispose();
+    licenseNumber.dispose();
+    experience.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate() || !acceptTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Revisa el formulario y acepta los términos')),
+        const SnackBar(
+          content: Text('Revisa el formulario y acepta los términos'),
+        ),
       );
       return;
     }
+
     setState(() => loading = true);
-    // TODO: llamar a tu AuthService.registerRaw(payload)
-    await Future.delayed(const Duration(milliseconds: 800));
-    if (mounted) {
-      setState(() => loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Registro enviado (demo)')),
+
+    try {
+      final fullName = name.text.trim();
+      final parts = fullName.split(' ');
+      final first = parts.isNotEmpty ? parts.first : 'Conductor';
+      final last =
+          parts.length > 1 ? parts.sublist(1).join(' ').trim() : '';
+
+      final created = await authRepo.registerRaw({
+        "firstName": first,
+        "lastName": last,
+        "email": email.text.trim(),
+        "password": pass.text.trim(),
+      });
+
+      if (created == null) {
+        throw Exception("No se pudo crear usuario");
+      }
+
+      final driver = await driverRepo.ensureDriverForEmail(
+        email: email.text.trim(),
+        fullName: fullName,
       );
-      Navigator.pop(context);
+
+      // ignore: dead_code
+      if (driver == null) {
+        throw Exception("No se pudo crear driver");
+      }
+
+      final driverId = (driver['id'] ?? '').toString();
+
+      // 3) Login automático
+      final loginResult = await authRepo.login(
+        email.text.trim(),
+        pass.text.trim(),
+      );
+
+      
+      // ignore: dead_code
+      if (loginResult == null) {
+        throw Exception("Login automático falló");
+      }
+
+    
+      if (!mounted) return;
+
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/driver/home',
+        (_) => false,
+        arguments: {
+          'driverId': driverId,
+          'fullName': fullName,
+          'email': email.text.trim(),
+        },
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: ${e.toString()}")),
+      );
+    } finally {
+      if (mounted) setState(() => loading = false);
     }
   }
 
@@ -57,52 +125,73 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
             child: Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     children: [
-                      TextFormField(controller: name, decoration: const InputDecoration(labelText: 'Nombre'), validator: (v)=> v!.isEmpty?'Requerido':null),
+                      TextFormField(
+                        controller: name,
+                        decoration:
+                            const InputDecoration(labelText: 'Nombre completo'),
+                        validator: (v) =>
+                            v!.isEmpty ? 'Requerido' : null,
+                      ),
                       const SizedBox(height: 10),
-                      TextFormField(controller: birth, decoration: const InputDecoration(labelText: 'Fecha de nacimiento (dd/mm/aaaa)')),
+
+                      TextFormField(
+                        controller: email,
+                        decoration: const InputDecoration(
+                            labelText: 'Correo electrónico'),
+                        validator: Validators.email,
+                      ),
                       const SizedBox(height: 10),
-                      TextFormField(controller: licenseType, decoration: const InputDecoration(labelText: 'Tipo de licencia')),
-                      const SizedBox(height: 10),
-                      TextFormField(controller: licenseNumber, decoration: const InputDecoration(labelText: 'N° de licencia')),
-                      const SizedBox(height: 10),
-                      TextFormField(controller: experience, decoration: const InputDecoration(labelText: 'Experiencia (años)')),
-                      const SizedBox(height: 10),
-                      TextFormField(controller: email, decoration: const InputDecoration(labelText: 'Correo electrónico'), validator: Validators.email),
-                      const SizedBox(height: 10),
+
                       TextFormField(
                         controller: pass,
                         decoration: InputDecoration(
                           labelText: 'Contraseña',
                           suffixIcon: IconButton(
-                            icon: Icon(obscure ? Icons.visibility : Icons.visibility_off),
-                            onPressed: () => setState(() => obscure = !obscure),
+                            icon: Icon(obscure
+                                ? Icons.visibility
+                                : Icons.visibility_off),
+                            onPressed: () =>
+                                setState(() => obscure = !obscure),
                           ),
                         ),
                         obscureText: obscure,
-                        validator: (v) => Validators.password(v, min: 6),
+                        validator: (v) =>
+                            Validators.password(v, min: 6),
                       ),
                       const SizedBox(height: 10),
+
                       CheckboxListTile(
                         value: acceptTerms,
-                        onChanged: (v) => setState(() => acceptTerms = v ?? false),
-                        title: const Text('Acepto los Términos y la Política de Privacidad'),
-                        controlAffinity: ListTileControlAffinity.leading,
+                        onChanged: (v) =>
+                            setState(() => acceptTerms = v ?? false),
+                        title: const Text(
+                            'Acepto los Términos y la Política de Privacidad'),
+                        controlAffinity:
+                            ListTileControlAffinity.leading,
                       ),
+
                       const SizedBox(height: 8),
+
                       SizedBox(
                         width: double.infinity,
                         height: 48,
                         child: ElevatedButton(
                           onPressed: loading ? null : _submit,
                           child: loading
-                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2),
+                                )
                               : const Text('Crear cuenta'),
                         ),
                       ),

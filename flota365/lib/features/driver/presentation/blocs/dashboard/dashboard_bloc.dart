@@ -22,26 +22,11 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       final driverId = e.driverId.toString();
       emit(state.copyWith(status: Status.loading, driverId: driverId));
 
-      
+    
       Map<String, dynamic>? profile = await repo.getDriverProfile(driverId);
-      profile ??= await repo.findDriverById(driverId); 
+      profile ??= await repo.findDriverById(driverId);
 
-     
-      final list = await repo.getAssignmentsForDriver(driverId);
-      Map<String, dynamic>? current;
-      for (final a in list) {
-        final status = (a['status']?.toString() ?? '').toLowerCase();
-        if (status == 'pending' || status == 'inprogress' || status == 'in_progress') {
-          current = a;
-          break;
-        }
-      }
-
-      emit(state.copyWith(
-        status: Status.success,
-        profile: profile,
-        current: current,
-      ));
+      emit(state.copyWith(status: Status.success, profile: profile, current: null));
     } catch (err) {
       emit(state.copyWith(status: Status.failure, error: err.toString()));
     }
@@ -54,14 +39,13 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     try {
       emit(state.copyWith(status: Status.loading));
 
-      
-      final profile = state.profile;
-      final email = (profile?['email'] ?? '').toString().trim();
+      // 1) Tomar email del perfil (Auth/profile)
+      final email = (state.profile?['email'] ?? '').toString().trim();
       if (email.isEmpty) {
         throw Exception('Email de perfil no disponible');
       }
 
-      // 2) Asegurar driver en /api/Driver (buscar por email y crear si no existe)
+    
       final ensuredDriver = await repo.ensureDriverForEmail(
         email: email,
         fullName: state.profile?['fullName'],
@@ -71,10 +55,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         throw Exception('El driver resuelto no tiene un id válido (GUID)');
       }
 
-      final driverId = driver['id']?.toString() ?? driver['code']?.toString() ?? '';
-      if (driverId.isEmpty) throw Exception('El driver no tiene un id válido');
-
-      
+      // 3) Obtener un vehículo
       final vehicle = await repo.getFirstVehicle();
       if (vehicle == null) throw Exception('No hay vehículos disponibles');
       final vehicleGuid = (vehicle['id'] ?? vehicle['code'] ?? '').toString();
@@ -82,10 +63,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         throw Exception('El vehículo no tiene un id válido (GUID/code)');
       }
 
-      final vehicleId = vehicle['id']?.toString() ?? vehicle['code']?.toString() ?? '';
-      if (vehicleId.isEmpty) throw Exception('El vehículo no tiene un id válido');
-
-    
+      // 4) Crear assignment (cuerpo plano según Swagger)
       final created = await repo.createAssignment(
         driverId: driverGuid,
         vehicleId: vehicleGuid,
@@ -95,14 +73,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         throw Exception('El backend no devolvió el assignment creado');
       }
 
-    
-      emit(state.copyWith(
-        status: Status.success,
-        current: created,
-      ));
-
-      add(DashboardStarted(state.driverId)); // refresh
-
+      emit(state.copyWith(status: Status.success, current: created));
     } catch (err) {
       emit(state.copyWith(status: Status.failure, error: err.toString()));
     }

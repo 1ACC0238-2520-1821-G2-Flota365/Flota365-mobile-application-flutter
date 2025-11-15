@@ -37,7 +37,7 @@ class DriverRepository {
             .map((e) => Map<String, dynamic>.from(e))
             .toList();
 
-        // Filtrar por driverId
+        
         return list.where((e) => e['driverId']?.toString() == driverId).toList();
       }
 
@@ -92,42 +92,49 @@ class DriverRepository {
     }
   }
 
-  // Primer vehículo 
+
+   Future<Map<String, dynamic>> ensureDriverForEmail({
+      required String email,
+      String? fullName,
+    }) async {
+      final existing = await findDriverByEmail(email);
+      if (existing != null) return existing;
+
+      final parts = (fullName ?? '').trim().split(' ');
+      final firstName = parts.isNotEmpty ? parts.first : 'Conductor';
+      final lastName = parts.length > 1 ? parts.sublist(1).join(' ') : '';
+
+      final payload = {
+        "code": "DRV-${DateTime.now().millisecondsSinceEpoch}",
+        "firstName": firstName,
+        "lastName": lastName,
+        "email": email
+      };
+
+      final r = await _service.createDriver(payload);
+      final data = r.data;
+
+      if (data is Map) {
+        return Map<String, dynamic>.from(data);
+      }
+
+      throw Exception('No se pudo crear el driver');
+    }
+
+
+
   Future<Map<String, dynamic>?> getFirstVehicle() async {
     final list = await getVehicles();
     return list.isNotEmpty ? list.first : null;
   }
 
-  // Crear assignment 
   Future<Map<String, dynamic>?> createAssignment({
     required String driverId,
     required String vehicleId,
     required String route,
   }) async {
-    final r = await _service.createAssignment(
-      driverId: driverId?.toString() ?? '',
-      vehicleId: vehicleId?.toString() ?? '',
-      route: route,
-    );
-    final data = r.data;
-    return (data is Map) ? (data as Map).cast<String, dynamic>() : null;
-  }
-
-  
-  Future<List<Map<String, dynamic>>> getAssignmentsForDriver(String driverId) async {
-    
-    final list = <Map<String, dynamic>>[];
-    
-    return list.where((a) => (a['driverId']?.toString() ?? '') == driverId).toList();
-  }
-
-  // “Perfil” simple: lo obtiene del catálogo de drivers por id
-  Future<Map<String, dynamic>?> getDriverProfile(String driverId) async {
-    final drivers = await getDrivers();
-    try {
-      return drivers.firstWhere((d) => (d['id']?.toString() ?? d['code']?.toString() ?? '') == driverId);
-    } catch (_) {
-      return null;
+    if (!_looksLikeGuid(driverId)) {
+      throw Exception('driverId no es un GUID (usa el id de /api/Driver, no el numérico de Auth). Valor: $driverId');
     }
     if (!_looksLikeGuid(vehicleId)) {
       throw Exception('vehicleId no es un GUID (usa el id de /api/Vehicle). Valor: $vehicleId');

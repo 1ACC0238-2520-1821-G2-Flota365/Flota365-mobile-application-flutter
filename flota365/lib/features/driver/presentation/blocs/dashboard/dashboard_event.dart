@@ -5,7 +5,12 @@ class DashboardStarted extends DashboardEvent {
   DashboardStarted(this.driverId);
 }
 
-class DashboardCreateAssignment extends DashboardEvent {} // 👈 Agrega esta clase
+class DashboardCreateAssignment extends DashboardEvent {} 
+
+
+// Si luego quieres “Crear jornada” desde la app, puedes añadir:
+// class DashboardCreateAssignment extends DashboardEvent {}
+
 
 
 class DashboardCheckInPressed extends DashboardEvent {

@@ -6,7 +6,7 @@ class AuthRepository {
   final AuthService _service;
   AuthRepository(this._service);
 
-  
+ 
   Future<(User, String?)> login(String email, String password) async {
     final Response res =
         await _service.loginRaw(email: email, password: password);
@@ -42,4 +42,20 @@ class AuthRepository {
     }
     return User.fromJson(res.data as Map<String, dynamic>);
   }
+    
+  Future<Map<String, dynamic>?> registerRaw(Map<String, dynamic> payload) async {
+    try {
+      final res = await _service.register(payload);
+      final data = res.data;
+
+      if (data is Map) {
+        return Map<String, dynamic>.from(data);
+      }
+
+      return null;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 }

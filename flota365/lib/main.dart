@@ -1,4 +1,3 @@
-// lib/main.dart
 import 'package:flota365/features/driver/presentation/pages/history_page.dart';
 import 'package:flota365/features/driver/presentation/pages/route_detail_page.dart';
 import 'package:flota365/features/driver/presentation/pages/routes_page.dart';
@@ -48,31 +47,37 @@ class FlotaApp extends StatelessWidget {
         AppRoutes.regManager: (_) => const RegisterManagerPage(),
         AppRoutes.managerHome: (_) => const _Stub(title: 'Home Gestor'),
 
-        // 🔵 LISTA DE RUTAS (MOCK)
+        // LISTA DE RUTAS (MOCK)
         '/routes': (context) {
           final driverId = ModalRoute.of(context)!.settings.arguments as String;
           return RoutesPage(driverId: driverId);
         },
 
-        // 🔵 DETALLE DE RUTA (MOCK)
+        //  DETALLE DE RUTA (MOCK)
         '/route-detail': (context) {
           final id = ModalRoute.of(context)!.settings.arguments as String;
-          return RouteDetailPage(routeId: id); // 🔥 CORREGIDO
+          return RouteDetailPage(routeId: id); 
         },
 
         '/history': (context) {
-            final driverId = ModalRoute.of(context)!.settings.arguments as String;
-            return HistoryPage(driverId: driverId);
-          },
+          final driverId = ModalRoute.of(context)!.settings.arguments as String;
+          return HistoryPage(driverId: driverId);
+        },
+
 
       },
 
-      
       onGenerateRoute: (settings) {
-        if (settings.name == '/driver/home') {
-          
-          final driverId = settings.arguments?.toString() ?? '';
-          debugPrint(' Argumento recibido en /driver/home: $driverId');
+        if (settings.name == AppRoutes.driverHome) {
+          final args = settings.arguments;
+          String driverId = '';
+
+          if (args is String) {
+            driverId = args;
+          } else if (args is Map) {
+            driverId = args['driverId']?.toString() ?? '';
+          }
+
           return MaterialPageRoute(
             builder: (_) => DriverDashboardPage(driverId: driverId),
           );
@@ -86,7 +91,6 @@ class FlotaApp extends StatelessWidget {
     );
   }
 }
-
 
 class _Stub extends StatelessWidget {
   final String title;

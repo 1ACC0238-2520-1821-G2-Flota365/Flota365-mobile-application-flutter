@@ -2,8 +2,11 @@
 
 class RouteEntity {
   final String id;
-  final String code;    
-  final String status;   
+  final String name;
+  final String status;
+  final double weight;
+  final double height;
+  final int restrictedRoads;
 
   const RouteEntity({
     required this.id,
