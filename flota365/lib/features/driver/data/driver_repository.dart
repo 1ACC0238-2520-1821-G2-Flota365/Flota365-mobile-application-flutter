@@ -94,35 +94,32 @@ class DriverRepository {
 
 
    Future<Map<String, dynamic>> ensureDriverForEmail({
-  required String email,
-  String? fullName,
-}) async {
-  final existing = await findDriverByEmail(email);
-  if (existing != null) return existing;
+      required String email,
+      String? fullName,
+    }) async {
+      final existing = await findDriverByEmail(email);
+      if (existing != null) return existing;
 
-  final parts = (fullName ?? '').trim().split(' ');
-  final firstName = parts.isNotEmpty ? parts.first : 'Conductor';
-  final lastName = parts.length > 1 ? parts.sublist(1).join(' ') : '';
+      final parts = (fullName ?? '').trim().split(' ');
+      final firstName = parts.isNotEmpty ? parts.first : 'Conductor';
+      final lastName = parts.length > 1 ? parts.sublist(1).join(' ') : '';
 
-  final payload = {
-    "code": "DRV-${DateTime.now().millisecondsSinceEpoch}",
-    "firstName": firstName,
-    "lastName": lastName,
-    "email": email
-  };
+      final payload = {
+        "code": "DRV-${DateTime.now().millisecondsSinceEpoch}",
+        "firstName": firstName,
+        "lastName": lastName,
+        "email": email
+      };
 
-  final r = await _service.createDriver(payload);
-  final data = r.data;
+      final r = await _service.createDriver(payload);
+      final data = r.data;
 
-  if (data is Map) {
-    return Map<String, dynamic>.from(data);
-  }
+      if (data is Map) {
+        return Map<String, dynamic>.from(data);
+      }
 
-  throw Exception('No se pudo crear el driver');
-}
-
-
-
+      throw Exception('No se pudo crear el driver');
+    }
 
 
 
