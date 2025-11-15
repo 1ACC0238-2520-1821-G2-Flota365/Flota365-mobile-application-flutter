@@ -63,20 +63,21 @@ class _LoginViewState extends State<_LoginView> {
                         await DriverGuidMapper.getGuid(intDriverId) ?? fakeGuid;
 
                     if (role == 'conductor' || role == 'driver') {
-                      final args = {
-                        'driverId': mappedGuid,
-                        'realId': intDriverId,
-                        'fullName': (u.fullName ?? '').toString(),
-                        'email': (u.email ?? '').toString(),
-                      };
+                        final args = {
+                          'driverId': intDriverId,           // <--- REAL ID
+                          'fakeGuid': mappedGuid,           // <--- para assignments
+                          'fullName': u.fullName ?? '',
+                          'email': u.email ?? '',
+                        };
 
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        '/driver/home',
-                        (_) => false,
-                        arguments: args,
-                      );
-                    } else {
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          '/driver/home',
+                          (_) => false,
+                          arguments: args,
+                        );
+                      }
+                      else {
                       Navigator.pushNamedAndRemoveUntil(
                         context,
                         '/manager/home',

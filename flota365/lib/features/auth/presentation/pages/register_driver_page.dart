@@ -39,7 +39,6 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
     super.dispose();
   }
 
-  // 🔥 REGISTRO COMPLETO Y FUNCIONAL
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate() || !acceptTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -59,7 +58,6 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
       final last =
           parts.length > 1 ? parts.sublist(1).join(' ').trim() : '';
 
-      // 1) Crear usuario en Auth
       final created = await authRepo.registerRaw({
         "firstName": first,
         "lastName": last,
@@ -71,12 +69,12 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
         throw Exception("No se pudo crear usuario");
       }
 
-      // 2) Crear driver REAL (solo campos que el backend acepta)
       final driver = await driverRepo.ensureDriverForEmail(
         email: email.text.trim(),
         fullName: fullName,
       );
 
+      // ignore: dead_code
       if (driver == null) {
         throw Exception("No se pudo crear driver");
       }
@@ -89,11 +87,13 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
         pass.text.trim(),
       );
 
+      
+      // ignore: dead_code
       if (loginResult == null) {
         throw Exception("Login automático falló");
       }
 
-      // 4) Navegar al dashboard
+    
       if (!mounted) return;
 
       Navigator.pushNamedAndRemoveUntil(
