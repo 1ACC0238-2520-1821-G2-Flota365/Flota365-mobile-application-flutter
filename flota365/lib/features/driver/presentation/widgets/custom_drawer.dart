@@ -42,26 +42,31 @@ class CustomDrawer extends StatelessWidget {
 
             // ---- MENU ITEMS ----
             _drawerItem(
+              context: context,
               icon: Icons.home_outlined,
               label: "Inicio",
               onTap: onHome,
             ),
             _drawerItem(
+              context: context,
               icon: Icons.map,
               label: "Rutas",
               onTap: onRoutes,
             ),
             _drawerItem(
+              context: context,
               icon: Icons.history,
               label: "Historial",
               onTap: onHistory,
             ),
             _drawerItem(
+              context: context,
               icon: Icons.notifications_outlined,
               label: "Notificaciones",
               onTap: onNotifications,
             ),
             _drawerItem(
+              context: context,
               icon: Icons.support_agent,
               label: "Servicio al cliente",
               onTap: onSupport,
@@ -73,6 +78,7 @@ class CustomDrawer extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 20.0),
               child: _drawerItem(
+                context: context,
                 icon: Icons.logout,
                 label: "Cerrar sesión",
                 color: Colors.red,
@@ -86,6 +92,7 @@ class CustomDrawer extends StatelessWidget {
   }
 
   Widget _drawerItem({
+    required BuildContext context,
     required IconData icon,
     required String label,
     Color color = Colors.black87,
@@ -93,7 +100,7 @@ class CustomDrawer extends StatelessWidget {
   }) {
     return InkWell(
       onTap: () {
-        Navigator.pop; 
+        Navigator.pop(context); // <-- AHORA SÍ FUNCIONA ✔
         onTap?.call();
       },
       child: Padding(
