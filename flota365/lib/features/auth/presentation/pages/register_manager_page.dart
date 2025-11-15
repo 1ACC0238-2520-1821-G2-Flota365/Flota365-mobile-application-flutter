@@ -36,7 +36,7 @@ class _RegisterManagerPageState extends State<RegisterManagerPage> {
       return;
     }
     setState(() => loading = true);
-    // TODO: llamar al endpoint de registro para gestor
+    
     await Future.delayed(const Duration(milliseconds: 800));
     if (mounted) {
       setState(() => loading = false);

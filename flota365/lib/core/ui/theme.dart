@@ -1,4 +1,3 @@
-// lib/core/ui/theme.dart
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
@@ -26,9 +25,7 @@ ThemeData buildAppTheme() {
   );
 
   return base.copyWith(
-    // -------------------------
-    // APP BAR
-    // -------------------------
+ 
     appBarTheme: AppBarTheme(
       backgroundColor: AppColors.primaryWhite,
       foregroundColor: AppColors.textBlack,
@@ -41,9 +38,7 @@ ThemeData buildAppTheme() {
       ),
     ),
 
-    // -------------------------
-    // BOTONES
-    // -------------------------
+    
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primaryBlue,
@@ -65,14 +60,12 @@ ThemeData buildAppTheme() {
       ),
     ),
 
-    // -------------------------
-    // INPUTS
-    // -------------------------
+   
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: AppColors.gray1.withOpacity(.35),
 
-      // Bordes
+      
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.gray1),
@@ -109,11 +102,9 @@ ThemeData buildAppTheme() {
       labelStyle: const TextStyle(color: AppColors.textBlack),
     ),
 
-    // -------------------------
-    // TEXTO GLOBAL
-    // -------------------------
+   
     textTheme: const TextTheme(
-      bodyMedium: TextStyle(                       // 👈 TEXTO DE INPUTS
+      bodyMedium: TextStyle(                       
         color: AppColors.textBlack,
         fontSize: 16,
       ),
@@ -137,14 +128,12 @@ ThemeData buildAppTheme() {
       ),
     ),
 
-    // Divider y progress bar
+  
     dividerColor: AppColors.gray1,
     progressIndicatorTheme:
         const ProgressIndicatorThemeData(color: AppColors.primaryBlue),
 
-    // -------------------------
-    // SWITCH
-    // -------------------------
+  
     switchTheme: SwitchThemeData(
       thumbIcon: MaterialStateProperty.resolveWith<Icon?>((states) {
         return states.contains(MaterialState.selected)

@@ -53,7 +53,7 @@ class _CheckInView extends StatelessWidget {
               Text('Assignment: ${state.assignmentId}'),
               const SizedBox(height: 12),
 
-              // Hora (solo lectura / editable si quieres)
+             
               TextFormField(
                 readOnly: true,
                 initialValue: state.time.toLocal().toString().substring(0, 19),

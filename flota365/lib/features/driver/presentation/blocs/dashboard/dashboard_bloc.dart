@@ -22,11 +22,10 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       final driverId = e.driverId.toString();
       emit(state.copyWith(status: Status.loading, driverId: driverId));
 
-      // Perfil por id (Auth/profile/{id}), con fallback al catálogo
+    
       Map<String, dynamic>? profile = await repo.getDriverProfile(driverId);
       profile ??= await repo.findDriverById(driverId);
 
-      // (Aún no tenemos endpoint de assignments por driver) -> current = null
       emit(state.copyWith(status: Status.success, profile: profile, current: null));
     } catch (err) {
       emit(state.copyWith(status: Status.failure, error: err.toString()));
@@ -46,7 +45,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         throw Exception('Email de perfil no disponible');
       }
 
-      // 2) Asegurar driver en /api/Driver (buscar por email y crear si no existe)
+    
       final ensuredDriver = await repo.ensureDriverForEmail(
         email: email,
         fullName: state.profile?['fullName'],

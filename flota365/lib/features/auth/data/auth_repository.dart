@@ -6,8 +6,7 @@ class AuthRepository {
   final AuthService _service;
   AuthRepository(this._service);
 
-  /// Éxito si el backend responde 200 y podemos mapear un User.
-  /// Trabajamos SIN token por ahora.
+ 
   Future<(User, String?)> login(String email, String password) async {
     final Response res =
         await _service.loginRaw(email: email, password: password);
