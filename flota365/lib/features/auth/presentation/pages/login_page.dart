@@ -4,8 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/enums/status.dart';
 import '../../../../core/utils/validators.dart';
-
-
 import 'package:flota365/core/helpers/driver_guid_mapper.dart';
 
 import '../../data/auth_repository.dart';
@@ -19,7 +17,6 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     final repo = AuthRepository(AuthService());
 
     return BlocProvider(
@@ -59,26 +56,16 @@ class _LoginViewState extends State<_LoginView> {
                     final u = state.user!;
                     final role = (u.role ?? '').toLowerCase();
 
-                    // ============================================================
-                    // 🔥 1. DriverId entero → GUID Falso
-                    // ============================================================
                     final intDriverId = (u.id ?? '').toString();
-
-                    // Generamos un GUID falso estable, ej: drv-37
                     final fakeGuid = "drv-$intDriverId";
-
-                    // Guardamos mapeo para reutilizarlo después
                     await DriverGuidMapper.saveMapping(intDriverId, fakeGuid);
-
                     final mappedGuid =
-                        await DriverGuidMapper.getGuid(intDriverId) ??
-                            fakeGuid;
-                    // ============================================================
+                        await DriverGuidMapper.getGuid(intDriverId) ?? fakeGuid;
 
                     if (role == 'conductor' || role == 'driver') {
                       final args = {
-                        'driverId': mappedGuid, // ← usamos GUID falso
-                        'realId': intDriverId, // ← guardamos el INT también
+                        'driverId': mappedGuid,
+                        'realId': intDriverId,
                         'fullName': (u.fullName ?? '').toString(),
                         'email': (u.email ?? '').toString(),
                       };
@@ -117,6 +104,17 @@ class _LoginViewState extends State<_LoginView> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         const SizedBox(height: 8),
+                        // LOGO 
+                          Center(
+                            child: Image.asset(
+                              'lib/features/auth/assets/logo.png',
+                              height: 90,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
                         Text('Flota365',
                             style: Theme.of(context).textTheme.headlineSmall),
                         const SizedBox(height: 4),
@@ -128,6 +126,7 @@ class _LoginViewState extends State<_LoginView> {
 
                         // Email
                         TextFormField(
+                          style: const TextStyle(color: Colors.black),
                           decoration:
                               const InputDecoration(labelText: 'Email'),
                           keyboardType: TextInputType.emailAddress,
@@ -139,6 +138,7 @@ class _LoginViewState extends State<_LoginView> {
 
                         // Password
                         TextFormField(
+                          style: const TextStyle(color: Colors.black),
                           decoration: InputDecoration(
                             labelText: 'Contraseña',
                             suffixIcon: IconButton(

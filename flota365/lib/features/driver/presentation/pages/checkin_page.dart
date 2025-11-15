@@ -36,7 +36,7 @@ class _CheckInView extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Check-In realizado')),
             );
-            Navigator.pop(context); 
+            Navigator.pop(context); // volver al dashboard
           }
           if (state.status == Status.failure && state.error != null) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -53,7 +53,7 @@ class _CheckInView extends StatelessWidget {
               Text('Assignment: ${state.assignmentId}'),
               const SizedBox(height: 12),
 
-              
+              // Hora (solo lectura / editable si quieres)
               TextFormField(
                 readOnly: true,
                 initialValue: state.time.toLocal().toString().substring(0, 19),

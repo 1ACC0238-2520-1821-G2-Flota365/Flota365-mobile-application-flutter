@@ -93,7 +93,7 @@ class CustomDrawer extends StatelessWidget {
   }) {
     return InkWell(
       onTap: () {
-        Navigator.pop; // cerrar drawer antes de navegar
+        Navigator.pop; 
         onTap?.call();
       },
       child: Padding(

@@ -6,7 +6,8 @@ class AuthRepository {
   final AuthService _service;
   AuthRepository(this._service);
 
-  
+  /// Éxito si el backend responde 200 y podemos mapear un User.
+  /// Trabajamos SIN token por ahora.
   Future<(User, String?)> login(String email, String password) async {
     final Response res =
         await _service.loginRaw(email: email, password: password);
@@ -42,7 +43,7 @@ class AuthRepository {
     }
     return User.fromJson(res.data as Map<String, dynamic>);
   }
-    /// Registro directo con el payload EXACTO que pide tu backend
+    
   Future<Map<String, dynamic>?> registerRaw(Map<String, dynamic> payload) async {
     try {
       final res = await _service.register(payload);

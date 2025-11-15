@@ -8,6 +8,11 @@ class DashboardStarted extends DashboardEvent {
 class DashboardCreateAssignment extends DashboardEvent {} // 👈 Agrega esta clase
 
 
+// Si luego quieres “Crear jornada” desde la app, puedes añadir:
+// class DashboardCreateAssignment extends DashboardEvent {}
+
+
+
 class DashboardCheckInPressed extends DashboardEvent {
   final String assignmentId;
   final Map<String, dynamic> payload;

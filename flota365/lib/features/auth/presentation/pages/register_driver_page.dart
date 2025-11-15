@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flota365/core/utils/validators.dart';
-import '../../../../core/enums/status.dart';
+
 import '../../../auth/data/auth_repository.dart';
 import '../../../auth/data/auth_service.dart';
 import '../../../driver/data/driver_repository.dart';
@@ -17,10 +17,10 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
   final _formKey = GlobalKey<FormState>();
 
   final name = TextEditingController();
-  final licenseNumber = TextEditingController();
-  final experience = TextEditingController();
   final email = TextEditingController();
   final pass = TextEditingController();
+  final licenseNumber = TextEditingController();
+  final experience = TextEditingController();
 
   bool obscure = true;
   bool loading = false;
@@ -32,20 +32,20 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
   @override
   void dispose() {
     name.dispose();
-    licenseNumber.dispose();
-    experience.dispose();
     email.dispose();
     pass.dispose();
+    licenseNumber.dispose();
+    experience.dispose();
     super.dispose();
   }
 
-  // ---------------------------------------------------------
-  // 🔥 REGISTRO COMPLETO (SIN LOGIN BLOC)
-  // ---------------------------------------------------------
+  // 🔥 REGISTRO COMPLETO Y FUNCIONAL
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate() || !acceptTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Revisa el formulario y acepta los términos')),
+        const SnackBar(
+          content: Text('Revisa el formulario y acepta los términos'),
+        ),
       );
       return;
     }
@@ -56,7 +56,8 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
       final fullName = name.text.trim();
       final parts = fullName.split(' ');
       final first = parts.isNotEmpty ? parts.first : 'Conductor';
-      final last = parts.length > 1 ? parts.sublist(1).join(' ') : '';
+      final last =
+          parts.length > 1 ? parts.sublist(1).join(' ').trim() : '';
 
       // 1) Crear usuario en Auth
       final created = await authRepo.registerRaw({
@@ -64,26 +65,25 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
         "lastName": last,
         "email": email.text.trim(),
         "password": pass.text.trim(),
-        "role": "Driver",
       });
 
       if (created == null) {
         throw Exception("No se pudo crear usuario");
       }
 
-      // 2) Crear driver real
+      // 2) Crear driver REAL (solo campos que el backend acepta)
       final driver = await driverRepo.ensureDriverForEmail(
         email: email.text.trim(),
         fullName: fullName,
       );
 
       if (driver == null) {
-        throw Exception("Driver no se pudo crear");
+        throw Exception("No se pudo crear driver");
       }
 
-      final driverId = (driver['id'] ?? "").toString();
+      final driverId = (driver['id'] ?? '').toString();
 
-      // 3) Login automático (directo sin bloc)
+      // 3) Login automático
       final loginResult = await authRepo.login(
         email.text.trim(),
         pass.text.trim(),
@@ -93,7 +93,9 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
         throw Exception("Login automático falló");
       }
 
-      // 4) Redirigir al dashboard
+      // 4) Navegar al dashboard
+      if (!mounted) return;
+
       Navigator.pushNamedAndRemoveUntil(
         context,
         '/driver/home',
@@ -105,11 +107,9 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
         },
       );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: ${e.toString()}")),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: ${e.toString()}")),
+      );
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -125,7 +125,8 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
             child: Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Form(
@@ -134,26 +135,17 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
                     children: [
                       TextFormField(
                         controller: name,
-                        decoration: const InputDecoration(labelText: 'Nombre completo'),
-                        validator: (v) => v!.isEmpty ? 'Requerido' : null,
-                      ),
-                      const SizedBox(height: 10),
-
-                      TextFormField(
-                        controller: licenseNumber,
-                        decoration: const InputDecoration(labelText: 'N° de licencia'),
-                       ),
-                      const SizedBox(height: 10),
-
-                      TextFormField(
-                        controller: experience,
-                        decoration: const InputDecoration(labelText: 'Experiencia (años)'),
+                        decoration:
+                            const InputDecoration(labelText: 'Nombre completo'),
+                        validator: (v) =>
+                            v!.isEmpty ? 'Requerido' : null,
                       ),
                       const SizedBox(height: 10),
 
                       TextFormField(
                         controller: email,
-                        decoration: const InputDecoration(labelText: 'Correo electrónico'),
+                        decoration: const InputDecoration(
+                            labelText: 'Correo electrónico'),
                         validator: Validators.email,
                       ),
                       const SizedBox(height: 10),
@@ -163,23 +155,31 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
                         decoration: InputDecoration(
                           labelText: 'Contraseña',
                           suffixIcon: IconButton(
-                            icon: Icon(obscure ? Icons.visibility : Icons.visibility_off),
-                            onPressed: () => setState(() => obscure = !obscure),
+                            icon: Icon(obscure
+                                ? Icons.visibility
+                                : Icons.visibility_off),
+                            onPressed: () =>
+                                setState(() => obscure = !obscure),
                           ),
                         ),
                         obscureText: obscure,
-                        validator: (v) => Validators.password(v, min: 6),
+                        validator: (v) =>
+                            Validators.password(v, min: 6),
                       ),
                       const SizedBox(height: 10),
 
                       CheckboxListTile(
                         value: acceptTerms,
-                        onChanged: (v) => setState(() => acceptTerms = v ?? false),
-                        title: const Text('Acepto los Términos y la Política de Privacidad'),
-                        controlAffinity: ListTileControlAffinity.leading,
+                        onChanged: (v) =>
+                            setState(() => acceptTerms = v ?? false),
+                        title: const Text(
+                            'Acepto los Términos y la Política de Privacidad'),
+                        controlAffinity:
+                            ListTileControlAffinity.leading,
                       ),
 
                       const SizedBox(height: 8),
+
                       SizedBox(
                         width: double.infinity,
                         height: 48,
@@ -189,7 +189,8 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
                               ? const SizedBox(
                                   width: 20,
                                   height: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2),
                                 )
                               : const Text('Crear cuenta'),
                         ),

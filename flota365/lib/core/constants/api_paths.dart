@@ -8,15 +8,15 @@ class ApiPaths {
   static const String authRegister = '/api/Auth/register';
   static String authProfileId(String id) => '/api/Auth/profile/$id';
 
-  // Alias 
-  static const String login = authLogin;
-  static const String register = authRegister;
+  // --- Drivers ---
+  static const String drivers = '/api/Driver';
 
   // --- Vehicles ---
   static const String vehicles = '/api/Vehicle';
 
-  // Assignment 
-  static const String assignment = '$baseUrl/api/Assignment';
-  static String assignmentStart(String id) => '$baseUrl/api/Assignment/$id/start';
-  static String assignmentComplete(String id) => '$baseUrl/api/Assignment/$id/complete';
+  // --- Assignments ---
+  static const String assignment = '/api/Assignment';
+  static String assignmentById(String id) => '/api/Assignment/$id';
+  static String assignmentStart(String id) => '/api/Assignment/$id/start';
+  static String assignmentComplete(String id) => '/api/Assignment/$id/complete';
 }
