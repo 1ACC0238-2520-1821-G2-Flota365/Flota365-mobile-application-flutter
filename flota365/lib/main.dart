@@ -61,9 +61,10 @@ class FlotaApp extends StatelessWidget {
         },
 
         '/history': (context) {
-            final driverId = ModalRoute.of(context)!.settings.arguments as String;
-            return HistoryPage(driverId: driverId);
-          },
+          final driverId = ModalRoute.of(context)!.settings.arguments as String;
+          return HistoryPage(driverId: driverId);
+        },
+
 
       },
 
