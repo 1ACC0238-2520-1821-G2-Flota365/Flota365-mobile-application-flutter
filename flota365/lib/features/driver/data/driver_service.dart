@@ -6,7 +6,7 @@ class DriverService {
   final Dio _dio = DioClient.build();
 
   // --- Auth/Profile ---
-  Future<Map<String, dynamic>?> getDriverProfile(String id) async {
+  Future<Map<String, dynamic>?> getDriverProfile(int id) async {
     try {
       final r = await _dio.get(ApiPaths.authProfileId(id));
       final data = r.data;
@@ -33,8 +33,8 @@ class DriverService {
 
   // --- Assignment ---
   Future<Response> createAssignment({
-    required String driverId,
-    required String vehicleId,
+    required int driverId,
+    required int vehicleId,
     required String route,
   }) {
     final payload = {
@@ -56,12 +56,12 @@ class DriverService {
   }
 
   // GET ASSIGNMENT DETAIL
-  Future<Response> getAssignmentById(String id) {
+  Future<Response> getAssignmentById(int id) {
     return _dio.get(ApiPaths.assignmentById(id));
   }
 
   // CHECK-IN
-  Future<Response> putCheckIn(String assignmentId, Map<String, dynamic> body) {
+  Future<Response> putCheckIn(int assignmentId, Map<String, dynamic> body) {
     return _dio.put(
       ApiPaths.assignmentStart(assignmentId),
       data: body,
@@ -70,14 +70,11 @@ class DriverService {
   }
 
   // CHECK-OUT
-  Future<Response> putCheckOut(String assignmentId, Map<String, dynamic> body) {
+  Future<Response> putCheckOut(int assignmentId, Map<String, dynamic> body) {
     return _dio.put(
       ApiPaths.assignmentComplete(assignmentId),
       data: body,
       options: Options(contentType: Headers.jsonContentType),
     );
   }
-
-
-  
 }

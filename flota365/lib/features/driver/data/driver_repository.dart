@@ -5,77 +5,44 @@ class DriverRepository {
   DriverRepository(this._service);
 
   Map<String, dynamic> _normalizeDriver(Map raw) {
-    final fullName = (raw['fullName'] ?? '${raw['firstName'] ?? ''} ${raw['lastName'] ?? ''}')
+    final fullName = (raw['fullName'] ??
+            '${raw['firstName'] ?? ''} ${raw['lastName'] ?? ''}')
         .toString()
         .trim();
+
     return {
-      'id': (raw['id'] ?? raw['code'] ?? '').toString(),
+      'id': raw['id'] is int ? raw['id'] : int.tryParse(raw['id'].toString()) ?? 0,
       'fullName': fullName.isEmpty ? 'Conductor' : fullName,
       'email': raw['email'],
     };
   }
 
-  bool _looksLikeGuid(String s) => RegExp(r'^[0-9a-fA-F-]{32,}$').hasMatch(s);
+  // ---------------------- DRIVERS ----------------------
 
   Future<List<Map<String, dynamic>>> getDrivers() async {
     final r = await _service.getDrivers();
     final data = r.data;
+
     if (data is List) {
-      return data.where((e) => e is Map).map((e) => _normalizeDriver(e as Map)).toList();
+      return data
+          .where((e) => e is Map)
+          .map((e) => _normalizeDriver(e as Map))
+          .toList();
     }
+
     return <Map<String, dynamic>>[];
   }
 
-
-  Future<List<Map<String, dynamic>>> getAssignmentsForDriver(String driverId) async {
-      final r = await _service.getAssignments();
-      final data = r.data;
-
-      if (data is List) {
-        final list = data
-            .where((e) => e is Map)
-            .map((e) => Map<String, dynamic>.from(e))
-            .toList();
-
-        
-        return list.where((e) => e['driverId']?.toString() == driverId).toList();
-      }
-
-      return [];
-    }
-    Future<Map<String, dynamic>?> getAssignmentDetail(String id) async {
-      final r = await _service.getAssignmentById(id);
-      final data = r.data;
-
-      if (data is Map) return Map<String, dynamic>.from(data);
-
-      return null;
-    }
-
-
-
-  Future<List<Map<String, dynamic>>> getVehicles() async {
-    final r = await _service.getVehicles();
-    final data = r.data;
-    if (data is List) {
-      return data.where((e) => e is Map)
-                 .map((e) => Map<String, dynamic>.from(e as Map))
-                 .toList();
-    }
-    return <Map<String, dynamic>>[];
-  }
-
-  
-  Future<Map<String, dynamic>?> getDriverProfile(String driverId) async {
+  Future<Map<String, dynamic>?> getDriverProfile(int driverId) async {
     final json = await _service.getDriverProfile(driverId);
     if (json != null) return _normalizeDriver(json);
     return await findDriverById(driverId);
   }
 
-  Future<Map<String, dynamic>?> findDriverById(String id) async {
+  Future<Map<String, dynamic>?> findDriverById(int id) async {
     final list = await getDrivers();
     try {
-      return list.firstWhere((e) => (e['id'] ?? '').toString() == id);
+      return list.firstWhere((e) => e['id'] == id);
     } catch (_) {
       return null;
     }
@@ -92,65 +59,119 @@ class DriverRepository {
     }
   }
 
+  // Crear driver si no existe
+  Future<Map<String, dynamic>> ensureDriverForEmail({
+    required String email,
+    String? fullName,
+  }) async {
+    final existing = await findDriverByEmail(email);
+    if (existing != null) return existing;
 
-   Future<Map<String, dynamic>> ensureDriverForEmail({
-      required String email,
-      String? fullName,
-    }) async {
-      final existing = await findDriverByEmail(email);
-      if (existing != null) return existing;
+    final parts = (fullName ?? '').trim().split(' ');
+    final firstName = parts.isNotEmpty ? parts.first : 'Conductor';
+    final lastName = parts.length > 1 ? parts.sublist(1).join(' ') : '';
 
-      final parts = (fullName ?? '').trim().split(' ');
-      final firstName = parts.isNotEmpty ? parts.first : 'Conductor';
-      final lastName = parts.length > 1 ? parts.sublist(1).join(' ') : '';
+    final payload = {
+      "firstName": firstName,
+      "lastName": lastName,
+      "email": email,
+    };
 
-      final payload = {
-        "code": "DRV-${DateTime.now().millisecondsSinceEpoch}",
-        "firstName": firstName,
-        "lastName": lastName,
-        "email": email
-      };
+    final r = await _service.createDriver(payload);
+    final data = r.data;
 
-      final r = await _service.createDriver(payload);
-      final data = r.data;
-
-      if (data is Map) {
-        return Map<String, dynamic>.from(data);
-      }
-
-      throw Exception('No se pudo crear el driver');
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
     }
 
+    throw Exception('No se pudo crear el driver');
+  }
 
+  // ---------------------- VEHICLES ----------------------
+
+  Future<List<Map<String, dynamic>>> getVehicles() async {
+    final r = await _service.getVehicles();
+    final data = r.data;
+    if (data is List) {
+      return data
+          .where((e) => e is Map)
+          .map((e) => Map<String, dynamic>.from(e as Map))
+          .toList();
+    }
+    return <Map<String, dynamic>>[];
+  }
 
   Future<Map<String, dynamic>?> getFirstVehicle() async {
     final list = await getVehicles();
     return list.isNotEmpty ? list.first : null;
   }
 
-  Future<Map<String, dynamic>?> createAssignment({
-    required String driverId,
-    required String vehicleId,
-    required String route,
-  }) async {
-    if (!_looksLikeGuid(driverId)) {
-      throw Exception('driverId no es un GUID (usa el id de /api/Driver, no el numérico de Auth). Valor: $driverId');
-    }
-    if (!_looksLikeGuid(vehicleId)) {
-      throw Exception('vehicleId no es un GUID (usa el id de /api/Vehicle). Valor: $vehicleId');
-    }
-    final r = await _service.createAssignment(driverId: driverId, vehicleId: vehicleId, route: route);
+  // ---------------------- ASSIGNMENTS ----------------------
+
+  Future<List<Map<String, dynamic>>> getAssignmentsForDriver(int driverId) async {
+    final r = await _service.getAssignments();
     final data = r.data;
-    return (data is Map) ? Map<String, dynamic>.from(data as Map) : null;
+
+    if (data is List) {
+      final list = data
+          .where((e) => e is Map)
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
+
+      return list.where((e) => e['driverId'] == driverId).toList();
+    }
+
+    return [];
   }
 
-  Future<void> doCheckIn({required String assignmentId, required Map<String, dynamic> payload}) {
+  Future<Map<String, dynamic>?> getAssignmentDetail(int id) async {
+  final r = await _service.getAssignments();
+  final data = r.data;
+
+  if (data is List) {
+    final list = data
+        .where((e) => e is Map)
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+
+    try {
+      return list.firstWhere((e) => e['id'] == id);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  return null;
+}
+
+
+  Future<Map<String, dynamic>?> createAssignment({
+    required int driverId,
+    required int vehicleId,
+    required String route,
+  }) async {
+    final r = await _service.createAssignment(
+      driverId: driverId,
+      vehicleId: vehicleId,
+      route: route,
+    );
+    final data = r.data;
+    return (data is Map) ? Map<String, dynamic>.from(data) : null;
+  }
+
+  // CHECK-IN / CHECK-OUT
+
+  Future<void> doCheckIn({
+    required int assignmentId,
+    required Map<String, dynamic> payload,
+  }) {
     return _service.putCheckIn(assignmentId, payload);
   }
 
-  Future<void> doCheckOut({required String assignmentId, required Map<String, dynamic> payload}) {
+  Future<void> doCheckOut({
+    required int assignmentId,
+    required Map<String, dynamic> payload,
+  }) {
     return _service.putCheckOut(assignmentId, payload);
   }
-
-  
 }
