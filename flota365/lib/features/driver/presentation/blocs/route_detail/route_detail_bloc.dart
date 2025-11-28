@@ -1,52 +1,34 @@
-import 'package:flota365/features/driver/data/dtos/local/local_route_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../data/driver_repository.dart';
+import '../../../domain/entities/assignmentEntity.dart';
 import 'route_detail_event.dart';
 import 'route_detail_state.dart';
 
 class RouteDetailBloc extends Bloc<RouteDetailEvent, RouteDetailState> {
-  final LocalRouteService _service = LocalRouteService();
+  final DriverRepository repo;
 
-  RouteDetailBloc() : super(const RouteDetailState.initial()) {
-    on<RouteDetailRequested>(_onLoad);
-    on<RouteProgressUpdated>(_onProgress);
-    on<RouteStopToggled>(_onToggleStop);
+  RouteDetailBloc(this.repo) : super(const RouteDetailState()) {
+    on<RouteDetailRequested>(_load);
   }
 
-  Future<void> _onLoad(
-    RouteDetailRequested event,
-    Emitter<RouteDetailState> emit,
-  ) async {
-    emit(state.copyWith(loading: true));
+  Future<void> _load(
+      RouteDetailRequested event, Emitter<RouteDetailState> emit) async {
+    emit(state.copyWith(loading: true, error: null));
 
-    final route = await _service.getRouteById(event.routeId);
+    try {
+      final data = await repo.getAssignmentDetail(event.routeId);
+      final assignment = AssignmentEntity.fromJson(data!);
 
-    emit(state.copyWith(
-      loading: false,
-      route: route,
-    ));
-  }
-
-  Future<void> _onProgress(
-    RouteProgressUpdated event,
-    Emitter<RouteDetailState> emit,
-  ) async {
-    final updated = Map<String, dynamic>.from(state.route!);
-    updated["progress"] = event.progress;
-
-    emit(state.copyWith(route: updated));
-  }
-
-  Future<void> _onToggleStop(
-    RouteStopToggled event,
-    Emitter<RouteDetailState> emit,
-  ) async {
-    final updated = Map<String, dynamic>.from(state.route!);
-    final stops = List<Map<String, dynamic>>.from(updated["stops"]);
-
-    stops[event.index]["done"] = !stops[event.index]["done"];
-
-    updated["stops"] = stops;
-
-    emit(state.copyWith(route: updated));
+      emit(state.copyWith(
+        loading: false,
+        assignment: assignment,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        loading: false,
+        error: e.toString(),
+      ));
+    }
   }
 }

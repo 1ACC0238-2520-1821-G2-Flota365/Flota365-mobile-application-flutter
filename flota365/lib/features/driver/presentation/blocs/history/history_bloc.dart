@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'history_event.dart';
 import 'history_state.dart';
 import '../../../data/driver_repository.dart';
+import '../../../domain/entities/assignmentEntity.dart';
 
 class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
   final DriverRepository repo;
@@ -16,19 +17,17 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     try {
       final list = await repo.getAssignmentsForDriver(event.driverId);
 
-      emit(
-        state.copyWith(
-          status: HistoryStatus.success,
-          items: list,
-        ),
-      );
+      final items = list.map((e) => AssignmentEntity.fromJson(e)).toList();
+
+      emit(state.copyWith(
+        status: HistoryStatus.success,
+        items: items,
+      ));
     } catch (e) {
-      emit(
-        state.copyWith(
-          status: HistoryStatus.failure,
-          error: e.toString(),
-        ),
-      );
+      emit(state.copyWith(
+        status: HistoryStatus.failure,
+        error: e.toString(),
+      ));
     }
   }
 }

@@ -1,10 +1,11 @@
 import 'package:equatable/equatable.dart';
+import '../../../domain/entities/assignmentEntity.dart';
 
 enum HistoryStatus { initial, loading, success, failure }
 
 class HistoryState extends Equatable {
   final HistoryStatus status;
-  final List<Map<String, dynamic>> items;
+  final List<AssignmentEntity> items;
   final String? error;
 
   const HistoryState({
@@ -18,7 +19,7 @@ class HistoryState extends Equatable {
 
   HistoryState copyWith({
     HistoryStatus? status,
-    List<Map<String, dynamic>>? items,
+    List<AssignmentEntity>? items,
     String? error,
   }) {
     return HistoryState(

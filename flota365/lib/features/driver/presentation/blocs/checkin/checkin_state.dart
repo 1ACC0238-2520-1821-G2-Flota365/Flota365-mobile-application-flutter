@@ -1,23 +1,22 @@
 import 'package:flota365/core/enums/status.dart';
 
-
 class CheckInState {
   final Status status;
-  final String assignmentId;
+  final int assignmentId;
 
   final DateTime time;
   final String location;
-  final double fuel;      // 0..100
+  final double fuel;
   final double cargoKg;
-  final Map<String, bool> checklist; // luces, frenos, neumaticos, otros
+  final Map<String, bool> checklist;
   final String notes;
 
   final String? error;
-  final bool enabled;     // habilita submit
+  final bool enabled;
 
   CheckInState({
     this.status = Status.idle,
-    this.assignmentId = '',
+    this.assignmentId = 0,     // ahora es INT
     DateTime? time,
     this.location = '',
     this.fuel = 0,
@@ -37,7 +36,7 @@ class CheckInState {
 
   CheckInState copyWith({
     Status? status,
-    String? assignmentId,
+    int? assignmentId,
     DateTime? time,
     String? location,
     double? fuel,

@@ -7,29 +7,38 @@ import 'checkin_state.dart';
 
 class CheckInBloc extends Bloc<CheckInEvent, CheckInState> {
   final DriverRepository repo;
-CheckInBloc(this.repo) : super(CheckInState(time: DateTime.now())) {
+
+  CheckInBloc(this.repo)
+      : super(CheckInState(time: DateTime.now())) {
     on<CheckInInit>((e, emit) {
-      emit(state.copyWith(assignmentId: e.assignmentId, time: DateTime.now()));
+      emit(state.copyWith(
+        assignmentId: e.assignmentId,
+        time: DateTime.now(),
+      ));
     });
+
     on<CheckInTimeChanged>((e, emit) => emit(state.copyWith(time: e.time)));
     on<CheckInLocationChanged>((e, emit) => emit(state.copyWith(location: e.location)));
     on<CheckInFuelChanged>((e, emit) => emit(state.copyWith(fuel: e.fuel)));
     on<CheckInCargoChanged>((e, emit) => emit(state.copyWith(cargoKg: e.cargoKg)));
     on<CheckInChecklistToggled>((e, emit) {
-      final m = Map<String, bool>.from(state.checklist)..[e.key] = e.value;
-      emit(state.copyWith(checklist: m));
+      final map = Map<String, bool>.from(state.checklist)..[e.key] = e.value;
+      emit(state.copyWith(checklist: map));
     });
     on<CheckInNotesChanged>((e, emit) => emit(state.copyWith(notes: e.notes)));
 
     on<CheckInSubmitted>(_onSubmit);
   }
 
-  Future<void> _onSubmit(CheckInSubmitted e, Emitter<CheckInState> emit) async {
-    if (state.assignmentId.isEmpty) {
-      emit(state.copyWith(error: 'Falta Assignment ID'));
+  Future<void> _onSubmit(
+      CheckInSubmitted e, Emitter<CheckInState> emit) async {
+    if (state.assignmentId == 0) {
+      emit(state.copyWith(error: 'Assignment ID inválido'));
       return;
     }
+
     emit(state.copyWith(status: Status.loading, enabled: false, error: null));
+
     final payload = {
       'time': state.time.toIso8601String(),
       'location': state.location,
@@ -40,12 +49,24 @@ CheckInBloc(this.repo) : super(CheckInState(time: DateTime.now())) {
     };
 
     try {
-      await repo.doCheckIn(assignmentId: state.assignmentId, payload: payload);
+      await repo.doCheckIn(
+        assignmentId: state.assignmentId,
+        payload: payload,
+      );
+
       emit(state.copyWith(status: Status.success, enabled: true));
     } on DioException catch (err) {
-      emit(state.copyWith(status: Status.failure, enabled: true, error: err.message));
+      emit(state.copyWith(
+        status: Status.failure,
+        enabled: true,
+        error: err.message,
+      ));
     } catch (err) {
-      emit(state.copyWith(status: Status.failure, enabled: true, error: err.toString()));
+      emit(state.copyWith(
+        status: Status.failure,
+        enabled: true,
+        error: err.toString(),
+      ));
     }
   }
 }

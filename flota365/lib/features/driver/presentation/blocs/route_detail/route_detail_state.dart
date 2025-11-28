@@ -1,33 +1,29 @@
 import 'package:equatable/equatable.dart';
+import '../../../domain/entities/assignmentEntity.dart';
 
 class RouteDetailState extends Equatable {
   final bool loading;
-  final Map<String, dynamic>? route;
+  final AssignmentEntity? assignment;
   final String? error;
 
   const RouteDetailState({
-    required this.loading,
-    required this.route,
+    this.loading = false,
+    this.assignment,
     this.error,
   });
 
-  const RouteDetailState.initial()
-      : loading = false,
-        route = null,
-        error = null;
-
   RouteDetailState copyWith({
     bool? loading,
-    Map<String, dynamic>? route,
+    AssignmentEntity? assignment,
     String? error,
   }) {
     return RouteDetailState(
       loading: loading ?? this.loading,
-      route: route ?? this.route,
+      assignment: assignment ?? this.assignment,
       error: error,
     );
   }
 
   @override
-  List<Object?> get props => [loading, route, error];
+  List<Object?> get props => [loading, assignment, error];
 }

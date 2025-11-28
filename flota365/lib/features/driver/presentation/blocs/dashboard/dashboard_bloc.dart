@@ -1,8 +1,8 @@
-import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flota365/core/enums/status.dart';
-
 import '../../../data/driver_repository.dart';
+import '../../../domain/entities/assignmentEntity.dart';
+import '../../../domain/entities/driver_info.dart';
 import 'dashboard_event.dart';
 import 'dashboard_state.dart';
 
@@ -11,71 +11,51 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
   DashboardBloc(this.repo) : super(const DashboardState()) {
     on<DashboardStarted>(_onStarted);
-    on<DashboardCreateAssignment>(_onCreate);
   }
 
   Future<void> _onStarted(
     DashboardStarted e,
     Emitter<DashboardState> emit,
   ) async {
+    emit(state.copyWith(status: Status.loading, driverId: e.driverId));
+
     try {
-      final driverId = e.driverId.toString();
-      emit(state.copyWith(status: Status.loading, driverId: driverId));
+      // PERFIL
+      final profileMap = await repo.getDriverProfile(e.driverId);
+      if (profileMap == null) throw Exception("Perfil no encontrado");
 
-    
-      Map<String, dynamic>? profile = await repo.getDriverProfile(driverId);
-      profile ??= await repo.findDriverById(driverId);
+      final profile = DriverInfo.fromJson(profileMap);
 
-      emit(state.copyWith(status: Status.success, profile: profile, current: null));
-    } catch (err) {
-      emit(state.copyWith(status: Status.failure, error: err.toString()));
-    }
-  }
+      // ASSIGNMENTS
+      final list = await repo.getAssignmentsForDriver(e.driverId);
+      final assignments =
+          list.map((item) => AssignmentEntity.fromJson(item)).toList();
 
-  Future<void> _onCreate(
-    DashboardCreateAssignment e,
-    Emitter<DashboardState> emit,
-  ) async {
-    try {
-      emit(state.copyWith(status: Status.loading));
-
-      // 1) Tomar email del perfil (Auth/profile)
-      final email = (state.profile?['email'] ?? '').toString().trim();
-      if (email.isEmpty) {
-        throw Exception('Email de perfil no disponible');
+      // ACTIVE = IN_PROGRESS
+      AssignmentEntity? active;
+      try {
+        active = assignments.firstWhere(
+            (a) => (a.status ?? "").toUpperCase() == "IN_PROGRESS");
+      } catch (_) {
+        active = null;
       }
 
-    
-      final ensuredDriver = await repo.ensureDriverForEmail(
-        email: email,
-        fullName: state.profile?['fullName'],
+      emit(
+        state.copyWith(
+          status: Status.success,
+          profile: profile,
+
+          assignments: assignments,
+
+          current: active,
+          clearError: true,
+        ),
       );
-      final driverGuid = (ensuredDriver['id'] ?? '').toString();
-      if (driverGuid.isEmpty) {
-        throw Exception('El driver resuelto no tiene un id válido (GUID)');
-      }
-
-      // 3) Obtener un vehículo
-      final vehicle = await repo.getFirstVehicle();
-      if (vehicle == null) throw Exception('No hay vehículos disponibles');
-      final vehicleGuid = (vehicle['id'] ?? vehicle['code'] ?? '').toString();
-      if (vehicleGuid.isEmpty) {
-        throw Exception('El vehículo no tiene un id válido (GUID/code)');
-      }
-
-      // 4) Crear assignment (cuerpo plano según Swagger)
-      final created = await repo.createAssignment(
-        driverId: driverGuid,
-        vehicleId: vehicleGuid,
-        route: 'Ruta-Automática',
-      );
-      if (created == null) {
-        throw Exception('El backend no devolvió el assignment creado');
-      }
-
-      emit(state.copyWith(status: Status.success, current: created));
     } catch (err) {
-      emit(state.copyWith(status: Status.failure, error: err.toString()));
+      emit(state.copyWith(
+        status: Status.failure,
+        error: err.toString(),
+      ));
     }
   }
 }

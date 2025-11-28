@@ -1,7 +1,7 @@
 abstract class CheckOutEvent {}
 
 class CheckOutInit extends CheckOutEvent {
-  final String assignmentId;
+  final int assignmentId;
   CheckOutInit(this.assignmentId);
 }
 
@@ -26,7 +26,6 @@ class CheckOutNotesChanged extends CheckOutEvent {
 }
 
 class CheckOutIssuesToggled extends CheckOutEvent {
-  /// “golpes”, “fugas”, “ruidos”, etc. (ajústalo a tu UI)
   final String key;
   final bool value;
   CheckOutIssuesToggled(this.key, this.value);

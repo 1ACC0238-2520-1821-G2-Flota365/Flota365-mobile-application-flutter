@@ -1,14 +1,13 @@
 import 'package:flota365/core/enums/status.dart';
 
-
 class CheckOutState {
   final Status status;
-  final String assignmentId;
+  final int assignmentId;
 
   final DateTime time;
   final String location;
   final double fuel;
-  final Map<String, bool> issues; // golpes, fugas, ruidos, etc.
+  final Map<String, bool> issues;
   final String notes;
 
   final String? error;
@@ -16,7 +15,7 @@ class CheckOutState {
 
   CheckOutState({
     this.status = Status.idle,
-    this.assignmentId = '',
+    this.assignmentId = 0,
     DateTime? time,
     this.location = '',
     this.fuel = 0,
@@ -25,16 +24,17 @@ class CheckOutState {
     this.error,
     this.enabled = true,
   })  : time = time ?? DateTime.now(),
-        issues = issues ?? const {
-          'golpes': false,
-          'fugas': false,
-          'ruidos': false,
-          'otros': false,
-        };
+        issues = issues ??
+            const {
+              'golpes': false,
+              'fugas': false,
+              'ruidos': false,
+              'otros': false,
+            };
 
   CheckOutState copyWith({
     Status? status,
-    String? assignmentId,
+    int? assignmentId,
     DateTime? time,
     String? location,
     double? fuel,

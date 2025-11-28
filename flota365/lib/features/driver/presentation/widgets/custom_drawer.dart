@@ -59,12 +59,7 @@ class CustomDrawer extends StatelessWidget {
               label: "Historial",
               onTap: onHistory,
             ),
-            _drawerItem(
-              context: context,
-              icon: Icons.notifications_outlined,
-              label: "Notificaciones",
-              onTap: onNotifications,
-            ),
+          
             _drawerItem(
               context: context,
               icon: Icons.support_agent,

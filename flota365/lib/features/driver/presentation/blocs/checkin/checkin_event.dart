@@ -1,7 +1,7 @@
 abstract class CheckInEvent {}
 
 class CheckInInit extends CheckInEvent {
-  final String assignmentId;
+  final int assignmentId;   // AHORA ES INT
   CheckInInit(this.assignmentId);
 }
 
@@ -16,7 +16,7 @@ class CheckInLocationChanged extends CheckInEvent {
 }
 
 class CheckInFuelChanged extends CheckInEvent {
-  final double fuel; // 0..100
+  final double fuel;
   CheckInFuelChanged(this.fuel);
 }
 
@@ -26,7 +26,7 @@ class CheckInCargoChanged extends CheckInEvent {
 }
 
 class CheckInChecklistToggled extends CheckInEvent {
-  final String key; // 'luces' | 'frenos' | 'neumaticos' | 'otros'
+  final String key;
   final bool value;
   CheckInChecklistToggled(this.key, this.value);
 }

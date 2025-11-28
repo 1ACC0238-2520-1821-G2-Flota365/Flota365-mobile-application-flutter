@@ -7,25 +7,32 @@ import 'checkout_state.dart';
 
 class CheckOutBloc extends Bloc<CheckOutEvent, CheckOutState> {
   final DriverRepository repo;
+
   CheckOutBloc(this.repo) : super(CheckOutState()) {
     on<CheckOutInit>((e, emit) {
-      emit(state.copyWith(assignmentId: e.assignmentId, time: DateTime.now()));
+      emit(state.copyWith(
+        assignmentId: e.assignmentId,
+        time: DateTime.now(),
+      ));
     });
+
     on<CheckOutTimeChanged>((e, emit) => emit(state.copyWith(time: e.time)));
     on<CheckOutLocationChanged>((e, emit) => emit(state.copyWith(location: e.location)));
     on<CheckOutFuelChanged>((e, emit) => emit(state.copyWith(fuel: e.fuel)));
     on<CheckOutNotesChanged>((e, emit) => emit(state.copyWith(notes: e.notes)));
+
     on<CheckOutIssuesToggled>((e, emit) {
-      final m = Map<String, bool>.from(state.issues)..[e.key] = e.value;
-      emit(state.copyWith(issues: m));
+      final map = Map<String, bool>.from(state.issues)..[e.key] = e.value;
+      emit(state.copyWith(issues: map));
     });
 
     on<CheckOutSubmitted>(_onSubmit);
   }
 
-  Future<void> _onSubmit(CheckOutSubmitted e, Emitter<CheckOutState> emit) async {
-    if (state.assignmentId.isEmpty) {
-      emit(state.copyWith(error: 'Falta Assignment ID'));
+  Future<void> _onSubmit(
+      CheckOutSubmitted e, Emitter<CheckOutState> emit) async {
+    if (state.assignmentId == 0) {
+      emit(state.copyWith(error: 'Assignment ID inválido'));
       return;
     }
 
@@ -40,12 +47,24 @@ class CheckOutBloc extends Bloc<CheckOutEvent, CheckOutState> {
     };
 
     try {
-      await repo.doCheckOut(assignmentId: state.assignmentId, payload: payload);
+      await repo.doCheckOut(
+        assignmentId: state.assignmentId,
+        payload: payload,
+      );
+
       emit(state.copyWith(status: Status.success, enabled: true));
     } on DioException catch (err) {
-      emit(state.copyWith(status: Status.failure, enabled: true, error: err.message));
+      emit(state.copyWith(
+        status: Status.failure,
+        enabled: true,
+        error: err.message,
+      ));
     } catch (err) {
-      emit(state.copyWith(status: Status.failure, enabled: true, error: err.toString()));
+      emit(state.copyWith(
+        status: Status.failure,
+        enabled: true,
+        error: err.toString(),
+      ));
     }
   }
 }

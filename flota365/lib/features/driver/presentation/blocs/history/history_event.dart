@@ -6,7 +6,7 @@ abstract class HistoryEvent extends Equatable {
 }
 
 class LoadHistory extends HistoryEvent {
-  final String driverId;
+  final int driverId;   // AHORA ES INT
 
   LoadHistory(this.driverId);
 
