@@ -5,30 +5,29 @@ import '../../../core/constants/api_paths.dart';
 class AuthService {
   final Dio _dio = DioClient.build();
 
-  Future<Response> loginRaw({
+  Future<Response> login({
     required String email,
     required String password,
   }) {
     return _dio.post(
       ApiPaths.authLogin,
-      data: {'email': email, 'password': password},
+      data: {
+        'email': email,
+        'password': password,
+      },
       options: Options(contentType: Headers.jsonContentType),
     );
   }
 
-  Future<Response> registerRaw(Map<String, dynamic> payload) {
+  Future<Response> register(Map<String, dynamic> payload) {
     return _dio.post(
       ApiPaths.authRegister,
       data: payload,
       options: Options(contentType: Headers.jsonContentType),
     );
   }
-    Future<Response> register(Map<String, dynamic> body) {
-    return _dio.post(
-      ApiPaths.authRegister,
-      data: body,
-      options: Options(contentType: Headers.jsonContentType),
-    );
-  }
 
+  Future<Response> getProfile(int id) {
+    return _dio.get(ApiPaths.authProfileId(id));
+  }
 }

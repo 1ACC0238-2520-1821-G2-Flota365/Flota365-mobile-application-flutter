@@ -6,56 +6,53 @@ class AuthRepository {
   final AuthService _service;
   AuthRepository(this._service);
 
- 
-  Future<(User, String?)> login(String email, String password) async {
-    final Response res =
-        await _service.loginRaw(email: email, password: password);
+  // LOGIN
+  Future<User> login(String email, String password) async {
+    final Response res = await _service.login(
+      email: email,
+      password: password,
+    );
 
     if (res.data is! Map<String, dynamic>) {
       throw 'Respuesta inesperada del backend: ${res.data}';
     }
 
-    final Map<String, dynamic> json = res.data as Map<String, dynamic>;
-    final user = User.fromJson(json);
-
-    // No hay token por ahora
-    return (user, null);
+    return User.fromJson(res.data as Map<String, dynamic>);
   }
 
+  // REGISTER
   Future<User> register({
     required String firstName,
     required String lastName,
     required String email,
     required String password,
-    required String role, // 'driver' | 'manager'
+    required String role, // driver | manager
   }) async {
-    final res = await _service.registerRaw({
+    final payload = {
       'firstName': firstName,
       'lastName': lastName,
       'email': email,
       'password': password,
       'role': role,
-    });
+    };
+
+    final res = await _service.register(payload);
 
     if (res.data is! Map<String, dynamic>) {
       throw 'Respuesta inesperada del backend: ${res.data}';
     }
+
     return User.fromJson(res.data as Map<String, dynamic>);
   }
-    
-  Future<Map<String, dynamic>?> registerRaw(Map<String, dynamic> payload) async {
-    try {
-      final res = await _service.register(payload);
-      final data = res.data;
 
-      if (data is Map) {
-        return Map<String, dynamic>.from(data);
-      }
+  // GET PROFILE
+  Future<User> getProfile(int id) async {
+    final Response res = await _service.getProfile(id);
 
-      return null;
-    } catch (e) {
-      rethrow;
+    if (res.data is! Map<String, dynamic>) {
+      throw 'Respuesta inesperada del backend: ${res.data}';
     }
-  }
 
+    return User.fromJson(res.data as Map<String, dynamic>);
+  }
 }
