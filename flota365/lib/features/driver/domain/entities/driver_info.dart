@@ -1,5 +1,5 @@
 class DriverInfo {
-  final String id;
+  final int id;
   final String fullName;
   final String? email;
 
@@ -11,8 +11,11 @@ class DriverInfo {
 
   factory DriverInfo.fromJson(Map<String, dynamic> json) {
     return DriverInfo(
-      id: json['id']?.toString() ?? '',
-      fullName: json['fullName'] ?? json['name'] ?? json['nombre'] ?? 'Conductor',
+      id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
+      fullName: json['fullName'] ??
+          json['name'] ??
+          json['nombre'] ??
+          'Conductor',
       email: json['email'],
     );
   }
