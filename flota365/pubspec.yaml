@@ -10,19 +10,30 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  url_launcher: ^6.3.0
   cupertino_icons: ^1.0.2
 
-  # --- HIVE (Storage local) ---
+  # ⭐ Dependencias principales
+  flutter_dotenv: ^6.0.0
+  google_maps_flutter: ^2.6.0
+  geolocator: ^14.0.2
+  geocoding: ^4.0.0
+  dio: ^5.7.0
+  flutter_polyline_points: ^3.1.0
+  
+    
+
+  # ⭐ HIVE (Storage local)
   hive: ^2.2.3
   hive_flutter: ^1.1.0
 
-  # --- PAQUETES DE RED Y ESTADO ---
-  dio: ^5.7.0
+  # ⭐ PAQUETES PARA ESTADO Y ALMACENAMIENTO
   flutter_secure_storage: ^9.0.0
   flutter_bloc: ^9.1.1
   equatable: ^2.0.5
   shared_preferences: ^2.5.3
+  http: ^1.6.0
+  
 
 dev_dependencies:
   flutter_test:
@@ -31,5 +42,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
   assets:
     - lib/features/auth/assets/
+  
