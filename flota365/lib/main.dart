@@ -1,6 +1,4 @@
-import 'package:flota365/features/driver/presentation/pages/history_page.dart';
-import 'package:flota365/features/driver/presentation/pages/route_detail_page.dart';
-import 'package:flota365/features/driver/presentation/pages/routes_page.dart';
+import 'package:flota365/features/driver/presentation/pages/support_page.dart';
 import 'package:flutter/material.dart';
 import 'core/ui/theme.dart';
 
@@ -12,6 +10,9 @@ import 'features/auth/presentation/pages/register_manager_page.dart';
 
 // Driver
 import 'features/driver/presentation/pages/dashboard_page.dart';
+import 'features/driver/presentation/pages/routes_page.dart';
+import 'features/driver/presentation/pages/route_detail_page.dart';
+import 'features/driver/presentation/pages/history_page.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -20,8 +21,11 @@ class AppRoutes {
   static const role = '/role';
   static const regDriver = '/register/driver';
   static const regManager = '/register/manager';
-  static const managerHome = '/manager/home';
+
   static const driverHome = '/driver/home';
+
+  // Opcionales
+  static const managerHome = '/manager/home';
 }
 
 void main() {
@@ -47,35 +51,37 @@ class FlotaApp extends StatelessWidget {
         AppRoutes.regManager: (_) => const RegisterManagerPage(),
         AppRoutes.managerHome: (_) => const _Stub(title: 'Home Gestor'),
 
-        // LISTA DE RUTAS (MOCK)
         '/routes': (context) {
-          final driverId = ModalRoute.of(context)!.settings.arguments as String;
-          return RoutesPage(driverId: driverId);
+          final id = ModalRoute.of(context)!.settings.arguments as int;
+          return RoutesPage(driverId: id);
         },
 
-        //  DETALLE DE RUTA (MOCK)
+        
         '/route-detail': (context) {
-          final id = ModalRoute.of(context)!.settings.arguments as String;
-          return RouteDetailPage(routeId: id); 
+          final id = ModalRoute.of(context)!.settings.arguments as int;
+          return RouteDetailPage(routeId: id);
         },
 
         '/history': (context) {
-          final driverId = ModalRoute.of(context)!.settings.arguments as String;
-          return HistoryPage(driverId: driverId);
+          final id = ModalRoute.of(context)!.settings.arguments as int;
+          return HistoryPage(driverId: id);
         },
 
+        '/support': (_) => const SupportPage(),
 
       },
 
+      // DRIVER HOME
       onGenerateRoute: (settings) {
         if (settings.name == AppRoutes.driverHome) {
           final args = settings.arguments;
-          String driverId = '';
 
-          if (args is String) {
+          int driverId = 0;
+
+          if (args is int) {
             driverId = args;
           } else if (args is Map) {
-            driverId = args['driverId']?.toString() ?? '';
+            driverId = args['driverId'] ?? 0;
           }
 
           return MaterialPageRoute(
@@ -101,20 +107,13 @@ class _Stub extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(title)),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(title, style: const TextStyle(fontSize: 22)),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => Navigator.pushNamedAndRemoveUntil(
-                context,
-                AppRoutes.login,
-                (_) => false,
-              ),
-              child: const Text('Cerrar sesión'),
-            ),
-          ],
+        child: ElevatedButton(
+          onPressed: () => Navigator.pushNamedAndRemoveUntil(
+            context,
+            AppRoutes.login,
+            (_) => false,
+          ),
+          child: const Text('Cerrar sesión'),
         ),
       ),
     );
