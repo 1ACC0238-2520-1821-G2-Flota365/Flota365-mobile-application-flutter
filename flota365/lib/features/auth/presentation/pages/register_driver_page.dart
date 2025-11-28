@@ -19,8 +19,6 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
   final name = TextEditingController();
   final email = TextEditingController();
   final pass = TextEditingController();
-  final licenseNumber = TextEditingController();
-  final experience = TextEditingController();
 
   bool obscure = true;
   bool loading = false;
@@ -34,8 +32,6 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
     name.dispose();
     email.dispose();
     pass.dispose();
-    licenseNumber.dispose();
-    experience.dispose();
     super.dispose();
   }
 
@@ -55,45 +51,35 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
       final fullName = name.text.trim();
       final parts = fullName.split(' ');
       final first = parts.isNotEmpty ? parts.first : 'Conductor';
-      final last =
-          parts.length > 1 ? parts.sublist(1).join(' ').trim() : '';
+      final last = parts.length > 1 ? parts.sublist(1).join(' ').trim() : '';
 
-      final created = await authRepo.registerRaw({
-        "firstName": first,
-        "lastName": last,
-        "email": email.text.trim(),
-        "password": pass.text.trim(),
-      });
+      // 1) Crear usuario
+      final user = await authRepo.register(
+        firstName: first,
+        lastName: last,
+        email: email.text.trim(),
+        password: pass.text.trim(),
+        role: 'driver',
+      );
 
-      if (created == null) {
-        throw Exception("No se pudo crear usuario");
-      }
-
+      // 2) Asegurar driver
       final driver = await driverRepo.ensureDriverForEmail(
         email: email.text.trim(),
         fullName: fullName,
       );
 
-      // ignore: dead_code
       if (driver == null) {
         throw Exception("No se pudo crear driver");
       }
 
-      final driverId = (driver['id'] ?? '').toString();
+      final int driverId = driver['id'] as int;
 
       // 3) Login automático
-      final loginResult = await authRepo.login(
+      final logged = await authRepo.login(
         email.text.trim(),
         pass.text.trim(),
       );
 
-      
-      // ignore: dead_code
-      if (loginResult == null) {
-        throw Exception("Login automático falló");
-      }
-
-    
       if (!mounted) return;
 
       Navigator.pushNamedAndRemoveUntil(
@@ -125,8 +111,8 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
             child: Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
+              shape:
+                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Form(
@@ -137,8 +123,7 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
                         controller: name,
                         decoration:
                             const InputDecoration(labelText: 'Nombre completo'),
-                        validator: (v) =>
-                            v!.isEmpty ? 'Requerido' : null,
+                        validator: (v) => v!.isEmpty ? 'Requerido' : null,
                       ),
                       const SizedBox(height: 10),
 
@@ -155,16 +140,14 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
                         decoration: InputDecoration(
                           labelText: 'Contraseña',
                           suffixIcon: IconButton(
-                            icon: Icon(obscure
-                                ? Icons.visibility
-                                : Icons.visibility_off),
+                            icon: Icon(
+                                obscure ? Icons.visibility : Icons.visibility_off),
                             onPressed: () =>
                                 setState(() => obscure = !obscure),
                           ),
                         ),
                         obscureText: obscure,
-                        validator: (v) =>
-                            Validators.password(v, min: 6),
+                        validator: (v) => Validators.password(v, min: 6),
                       ),
                       const SizedBox(height: 10),
 
@@ -174,8 +157,7 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
                             setState(() => acceptTerms = v ?? false),
                         title: const Text(
                             'Acepto los Términos y la Política de Privacidad'),
-                        controlAffinity:
-                            ListTileControlAffinity.leading,
+                        controlAffinity: ListTileControlAffinity.leading,
                       ),
 
                       const SizedBox(height: 8),
@@ -189,8 +171,7 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
                               ? const SizedBox(
                                   width: 20,
                                   height: 20,
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 2),
+                                  child: CircularProgressIndicator(strokeWidth: 2),
                                 )
                               : const Text('Crear cuenta'),
                         ),

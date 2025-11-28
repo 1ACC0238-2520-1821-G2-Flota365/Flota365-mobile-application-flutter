@@ -1,10 +1,8 @@
-import 'package:flota365/features/driver/presentation/pages/driver_args.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/enums/status.dart';
 import '../../../../core/utils/validators.dart';
-import 'package:flota365/core/helpers/driver_guid_mapper.dart';
 
 import '../../data/auth_repository.dart';
 import '../../data/auth_service.dart';
@@ -54,30 +52,21 @@ class _LoginViewState extends State<_LoginView> {
                 listener: (context, state) async {
                   if (state.status == Status.success && state.user != null) {
                     final u = state.user!;
-                    final role = (u.role ?? '').toLowerCase();
-
-                    final intDriverId = (u.id ?? '').toString();
-                    final fakeGuid = "drv-$intDriverId";
-                    await DriverGuidMapper.saveMapping(intDriverId, fakeGuid);
-                    final mappedGuid =
-                        await DriverGuidMapper.getGuid(intDriverId) ?? fakeGuid;
+                    final role = (u.role).toLowerCase();
+                    final int driverId = u.id;
 
                     if (role == 'conductor' || role == 'driver') {
-                        final args = {
-                          'driverId': intDriverId,           // <--- REAL ID
-                          'fakeGuid': mappedGuid,           // <--- para assignments
-                          'fullName': u.fullName ?? '',
-                          'email': u.email ?? '',
-                        };
-
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          '/driver/home',
-                          (_) => false,
-                          arguments: args,
-                        );
-                      }
-                      else {
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/driver/home',
+                        (_) => false,
+                        arguments: {
+                          'driverId': driverId,
+                          'fullName': u.fullName,
+                          'email': u.email,
+                        },
+                      );
+                    } else {
                       Navigator.pushNamedAndRemoveUntil(
                         context,
                         '/manager/home',
@@ -105,16 +94,15 @@ class _LoginViewState extends State<_LoginView> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         const SizedBox(height: 8),
-                        // LOGO 
-                          Center(
-                            child: Image.asset(
-                              'lib/features/auth/assets/logo.png',
-                              height: 90,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
 
-                          const SizedBox(height: 16),
+                        Center(
+                          child: Image.asset(
+                            'lib/features/auth/assets/logo.png',
+                            height: 90,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
 
                         Text('Flota365',
                             style: Theme.of(context).textTheme.headlineSmall),
@@ -125,39 +113,33 @@ class _LoginViewState extends State<_LoginView> {
                         ),
                         const SizedBox(height: 16),
 
-                        // Email
                         TextFormField(
                           style: const TextStyle(color: Colors.black),
                           decoration:
                               const InputDecoration(labelText: 'Email'),
                           keyboardType: TextInputType.emailAddress,
                           validator: Validators.email,
-                          onChanged: (v) =>
-                              bloc.add(LoginEmailChanged(v)),
+                          onChanged: (v) => bloc.add(LoginEmailChanged(v)),
                         ),
                         const SizedBox(height: 12),
 
-                        // Password
                         TextFormField(
                           style: const TextStyle(color: Colors.black),
                           decoration: InputDecoration(
                             labelText: 'Contraseña',
                             suffixIcon: IconButton(
-                              icon: Icon(_obscure
-                                  ? Icons.visibility
-                                  : Icons.visibility_off),
+                              icon: Icon(
+                                  _obscure ? Icons.visibility : Icons.visibility_off),
                               onPressed: () =>
                                   setState(() => _obscure = !_obscure),
                             ),
                           ),
                           obscureText: _obscure,
                           validator: (v) => Validators.password(v, min: 6),
-                          onChanged: (v) =>
-                              bloc.add(LoginPasswordChanged(v)),
+                          onChanged: (v) => bloc.add(LoginPasswordChanged(v)),
                         ),
                         const SizedBox(height: 16),
 
-                        // Submit
                         SizedBox(
                           height: 48,
                           child: ElevatedButton(
@@ -172,8 +154,8 @@ class _LoginViewState extends State<_LoginView> {
                                 ? const SizedBox(
                                     width: 20,
                                     height: 20,
-                                    child: CircularProgressIndicator(
-                                        strokeWidth: 2),
+                                    child:
+                                        CircularProgressIndicator(strokeWidth: 2),
                                   )
                                 : const Text('Iniciar sesión'),
                           ),
