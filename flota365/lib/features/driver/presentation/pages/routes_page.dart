@@ -47,7 +47,7 @@ class _RoutesViewState extends State<_RoutesView> {
   Set<Marker> markers = {};
   Set<Polyline> polylines = {};
 
-  final String gMapsKey = "API_KEY_GOOGLE_MAPS";
+  final String gMapsKey = "API_KEY";
 
   @override
   void initState() {

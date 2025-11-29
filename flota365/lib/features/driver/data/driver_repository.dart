@@ -174,4 +174,38 @@ class DriverRepository {
   }) {
     return _service.putCheckOut(assignmentId, payload);
   }
+
+
+  Future<Map<String, dynamic>> createDriverFull({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String licenseNumber,
+    required String licenseExpiryDate,
+    required String phone,
+    required int experienceYears,
+  }) async {
+    final payload = {
+    "code": "DRV-${DateTime.now().millisecondsSinceEpoch}",
+    "firstName": firstName,
+    "lastName": lastName,
+    "licenseNumber": licenseNumber,
+    "licenseExpiryDate": licenseExpiryDate, 
+    "phone": phone,
+    "email": email,
+    "experienceYears": experienceYears,
+  };
+
+
+  final r = await _service.createDriver(payload);
+  final data = r.data;
+
+  if (data is Map) {
+    return Map<String, dynamic>.from(data);
+  }
+
+  throw Exception("No se pudo crear driver");
+}
+
+
 }

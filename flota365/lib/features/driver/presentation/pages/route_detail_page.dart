@@ -54,7 +54,7 @@ class _RouteDetailViewState extends State<_RouteDetailView> {
   bool userIsInteracting = false;
   Timer? _userInteractionTimer;
 
-  final String gMapsKey = "API_KEY_GOOGLE_MAPS";
+  final String gMapsKey = "API_KEY_GOOGLE_MAPS"; // Reemplazar con tu clave de API
 
   @override
   void dispose() {

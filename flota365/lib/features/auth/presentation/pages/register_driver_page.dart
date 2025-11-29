@@ -20,6 +20,11 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
   final email = TextEditingController();
   final pass = TextEditingController();
 
+  String licenseNumber = '';
+  String phone = '';
+  int experienceYears = 0;
+  String? licenseExpiryDate;
+
   bool obscure = true;
   bool loading = false;
   bool acceptTerms = false;
@@ -59,14 +64,32 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
         lastName: last,
         email: email.text.trim(),
         password: pass.text.trim(),
-        role: 'driver',
+        role: 'Driver',
       );
 
-      // 2) Asegurar driver
-      final driver = await driverRepo.ensureDriverForEmail(
-        email: email.text.trim(),
-        fullName: fullName,
-      );
+      final driver = await driverRepo.createDriverFull(
+      firstName: first,
+      lastName: last,
+      email: email.text.trim(),
+      licenseNumber: licenseNumber,
+      licenseExpiryDate: licenseExpiryDate!, 
+      phone: phone,
+      experienceYears: experienceYears,
+    );
+
+      print("DATA DRIVER =>");
+      print({
+        "code": "DRV-${DateTime.now().millisecondsSinceEpoch}",
+        "firstName": first,
+        "lastName": last,
+        "licenseNumber": licenseNumber,
+        "licenseExpireDate": licenseExpiryDate,
+        "phone": phone,
+        "email": email.text.trim(),
+        "experienceYears": experienceYears,
+      });
+
+
 
       if (driver == null) {
         throw Exception("No se pudo crear driver");
@@ -150,6 +173,59 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
                         validator: (v) => Validators.password(v, min: 6),
                       ),
                       const SizedBox(height: 10),
+                      // Número de licencia
+                      TextFormField(
+                        decoration: const InputDecoration(labelText: 'Número de licencia'),
+                        validator: (v) => v!.isEmpty ? 'Requerido' : null,
+                        onChanged: (v) => licenseNumber = v,
+                      ),
+                      const SizedBox(height: 10),
+
+                      // Teléfono
+                      TextFormField(
+                        decoration: const InputDecoration(labelText: 'Teléfono'),
+                        keyboardType: TextInputType.phone,
+                        validator: (v) => v!.isEmpty ? 'Requerido' : null,
+                        onChanged: (v) => phone = v,
+                      ),
+                      const SizedBox(height: 10),
+
+                      // Años de experiencia
+                      TextFormField(
+                        decoration: const InputDecoration(labelText: 'Años de experiencia'),
+                        keyboardType: TextInputType.number,
+                        validator: (v) => v!.isEmpty ? 'Requerido' : null,
+                        onChanged: (v) => experienceYears = int.tryParse(v) ?? 0,
+                      ),
+                      const SizedBox(height: 10),
+
+                      // Fecha de expiración de licencia
+                      InkWell(
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2030),
+                          );
+                          if (picked != null) {
+                            setState(() => licenseExpiryDate = picked.toIso8601String());
+                          }
+                        },
+                        child: InputDecorator(
+                          decoration: const InputDecoration(
+                            labelText: 'Fecha de expiración de la licencia',
+                            border: OutlineInputBorder(),
+                          ),
+                          child: Text(
+                            licenseExpiryDate != null
+                                ? licenseExpiryDate!.split('T').first
+                                : 'Selecciona una fecha',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+
 
                       CheckboxListTile(
                         value: acceptTerms,
