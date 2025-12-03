@@ -1,3 +1,4 @@
+import 'package:flota365/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -66,13 +67,14 @@ class _LoginViewState extends State<_LoginView> {
                           'email': u.email,
                         },
                       );
-                    } else {
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        '/manager/home',
-                        (_) => false,
-                      );
-                    }
+                    } else if (role.contains('manager')) {
+                          // MANAGER
+                          Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              AppRoutes.managerHome,
+                              (_) => false,
+                            );
+                        }
                   }
 
                   if (state.status == Status.failure && state.error != null) {

@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../../core/utils/validators.dart';
+import '../../data/auth_repository.dart';
+import '../../data/auth_service.dart';
+import '../../domain/user.dart';
 
 class RegisterManagerPage extends StatefulWidget {
   const RegisterManagerPage({super.key});
@@ -10,21 +15,28 @@ class RegisterManagerPage extends StatefulWidget {
 
 class _RegisterManagerPageState extends State<RegisterManagerPage> {
   final _formKey = GlobalKey<FormState>();
+
   final name = TextEditingController();
-  final birth = TextEditingController();
-  final companyRuc = TextEditingController();
-  final position = TextEditingController();
-  final phone = TextEditingController();
+  final birth = TextEditingController();       // NO usado, pero se mantiene por UI
+  final companyRuc = TextEditingController();  // NO usado
+  final position = TextEditingController();    // NO usado
+  final phone = TextEditingController();       // NO usado
   final email = TextEditingController();
   final pass = TextEditingController();
+
   bool obscure = true;
   bool loading = false;
   bool acceptTerms = false;
 
   @override
   void dispose() {
-    name.dispose(); birth.dispose(); companyRuc.dispose();
-    position.dispose(); phone.dispose(); email.dispose(); pass.dispose();
+    name.dispose();
+    birth.dispose();
+    companyRuc.dispose();
+    position.dispose();
+    phone.dispose();
+    email.dispose();
+    pass.dispose();
     super.dispose();
   }
 
@@ -35,15 +47,45 @@ class _RegisterManagerPageState extends State<RegisterManagerPage> {
       );
       return;
     }
+
     setState(() => loading = true);
-    
-    await Future.delayed(const Duration(milliseconds: 800));
-    if (mounted) {
-      setState(() => loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Registro enviado (demo)')),
+
+    final repo = AuthRepository(AuthService());
+
+    try {
+      final String fullName = name.text.trim();
+      List<String> parts = fullName.split(" ");
+
+      final String firstName = parts.first;
+      final String lastName = parts.length > 1 ? parts.sublist(1).join(" ") : parts.first;
+
+      final User user = await repo.register(
+        firstName: firstName,
+        lastName: lastName,
+        email: email.text.trim(),
+        password: pass.text.trim(),
+        role: "Manager",
       );
-      Navigator.pop(context);
+
+      if (!mounted) return;
+
+      setState(() => loading = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gestor registrado con éxito')),
+      );
+
+      // Navegación final
+      Navigator.pushReplacementNamed(context, '/login');
+
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() => loading = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
     }
   }
 
@@ -64,20 +106,51 @@ class _RegisterManagerPageState extends State<RegisterManagerPage> {
                   key: _formKey,
                   child: Column(
                     children: [
-                      TextFormField(controller: name, decoration: const InputDecoration(labelText: 'Nombre'), validator: (v)=> v!.isEmpty?'Requerido':null),
+                      TextFormField(
+                        controller: name,
+                        decoration: const InputDecoration(labelText: 'Nombre completo'),
+                        validator: (v) => v!.isEmpty ? 'Requerido' : null,
+                      ),
                       const SizedBox(height: 10),
-                      TextFormField(controller: birth, decoration: const InputDecoration(labelText: 'Fecha de nacimiento (dd/mm/aaaa)')),
+
+                      TextFormField(
+                        controller: birth,
+                        decoration: const InputDecoration(
+                          labelText: 'Fecha de nacimiento (opcional)',
+                        ),
+                      ),
                       const SizedBox(height: 10),
-                      TextFormField(controller: companyRuc, decoration: const InputDecoration(labelText: 'Empresa / RUC')),
+
+                      TextFormField(
+                        controller: companyRuc,
+                        decoration: const InputDecoration(
+                          labelText: 'Empresa / RUC (opcional)',
+                        ),
+                      ),
                       const SizedBox(height: 10),
-                      TextFormField(controller: position, decoration: const InputDecoration(labelText: 'Cargo')),
+
+                      TextFormField(
+                        controller: position,
+                        decoration: const InputDecoration(labelText: 'Cargo (opcional)'),
+                      ),
                       const SizedBox(height: 10),
-                      TextFormField(controller: phone, decoration: const InputDecoration(labelText: 'Teléfono')),
+
+                      TextFormField(
+                        controller: phone,
+                        decoration: const InputDecoration(labelText: 'Teléfono (opcional)'),
+                      ),
                       const SizedBox(height: 10),
-                      TextFormField(controller: email, decoration: const InputDecoration(labelText: 'Correo electrónico'), validator: Validators.email),
+
+                      TextFormField(
+                        controller: email,
+                        decoration: const InputDecoration(labelText: 'Correo electrónico'),
+                        validator: Validators.email,
+                      ),
                       const SizedBox(height: 10),
+
                       TextFormField(
                         controller: pass,
+                        obscureText: obscure,
                         decoration: InputDecoration(
                           labelText: 'Contraseña',
                           suffixIcon: IconButton(
@@ -85,24 +158,31 @@ class _RegisterManagerPageState extends State<RegisterManagerPage> {
                             onPressed: () => setState(() => obscure = !obscure),
                           ),
                         ),
-                        obscureText: obscure,
                         validator: (v) => Validators.password(v, min: 6),
                       ),
+
                       const SizedBox(height: 10),
+
                       CheckboxListTile(
                         value: acceptTerms,
                         onChanged: (v) => setState(() => acceptTerms = v ?? false),
                         title: const Text('Acepto los Términos y la Política de Privacidad'),
                         controlAffinity: ListTileControlAffinity.leading,
                       ),
+
                       const SizedBox(height: 8),
+
                       SizedBox(
                         width: double.infinity,
                         height: 48,
                         child: ElevatedButton(
                           onPressed: loading ? null : _submit,
                           child: loading
-                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
                               : const Text('Crear cuenta'),
                         ),
                       ),
