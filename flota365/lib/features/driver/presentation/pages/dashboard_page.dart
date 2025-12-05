@@ -77,11 +77,9 @@ class _DashboardView extends StatelessWidget {
                   arguments: state.driverId,
                 );
               },
-            
               onSupport: () {
                 Navigator.pushNamed(context, '/support');
               },
-
               onLogout: () {
                 Navigator.pushReplacementNamed(context, "/login");
               },
@@ -118,71 +116,161 @@ class _DashboardBody extends StatelessWidget {
     if (assignments.isNotEmpty) {
       try {
         active = assignments.firstWhere(
-          (a) => (a.status ?? "").toUpperCase() == "IN_PROGRESS",
+          (a) {
+            final s = (a.status ?? "").toUpperCase();
+            return s == "IN_PROGRESS" || s == "PENDING" || s == "ACTIVE";
+          },
         );
       } catch (_) {
         active = null;
       }
     }
 
+    final activeStatus = (active?.status ?? "Sin assignment activo").toString();
+
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // TEXTO BIENVENIDO 
-            Text(
-              "Bienvenido, $fullName",
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+            // Header (pro)
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.black.withOpacity(.06)),
+                boxShadow: [
+                  BoxShadow(
+                    blurRadius: 18,
+                    offset: const Offset(0, 10),
+                    color: Colors.black.withOpacity(.06),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    height: 46,
+                    width: 46,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.blue.withOpacity(.10),
+                    ),
+                    child: Icon(
+                      Icons.person_rounded,
+                      color: Colors.blue.shade700,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Bienvenido, $fullName",
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "Revisa tu ubicación y tus asignaciones.",
+                          style: TextStyle(
+                            color: Colors.black.withOpacity(.65),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  _StatusPill(status: activeStatus),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
 
-            //MAPA (UBICACIÓN SOLO) 
-            Card(
-              child: SizedBox(
-                height: 220,
-                child: const _MyLocationMap(),
+            const SizedBox(height: 14),
+
+            // Mapa (pro)
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.black.withOpacity(.06)),
+                boxShadow: [
+                  BoxShadow(
+                    blurRadius: 18,
+                    offset: const Offset(0, 10),
+                    color: Colors.black.withOpacity(.06),
+                  ),
+                ],
               ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // MI JORNADA (SOLO INFO, SIN BOTONES) 
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Mi jornada",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Estado: ${active?.status ?? "Sin assignment activo"}",
-                    ),
-                    Text(
-                      "Hora de inicio: ${active?.assignedAt?.toLocal().toString().substring(0, 19) ?? "-"}",
-                    ),
-                    Text(
-                      "Vehículo: ${active?.vehicleId ?? "-"}",
-                    ),
-                  ],
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: SizedBox(
+                  height: 240,
+                  child: const _MyLocationMap(),
                 ),
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
-            // MIS ASIGNACIONES (TU DISEÑO) 
+            // Mi jornada (pro)
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.black.withOpacity(.06)),
+                boxShadow: [
+                  BoxShadow(
+                    blurRadius: 18,
+                    offset: const Offset(0, 10),
+                    color: Colors.black.withOpacity(.06),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Mi jornada",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  _MetaRow(
+                    icon: Icons.info_outline_rounded,
+                    label: "Estado",
+                    value: active?.status ?? "Sin assignment activo",
+                  ),
+                  const SizedBox(height: 8),
+                  _MetaRow(
+                    icon: Icons.schedule_rounded,
+                    label: "Hora de inicio",
+                    value: active?.assignedAt?.toLocal().toString().substring(0, 19) ?? "-",
+                  ),
+                  const SizedBox(height: 8),
+                  _MetaRow(
+                    icon: Icons.directions_car_filled_rounded,
+                    label: "Vehículo",
+                    value: "${active?.vehicleId ?? "-"}",
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            // Mis asignaciones (tu sección, pero con mejor card)
             _AssignmentsListCard(
               assignments: assignments,
               active: active,
@@ -194,7 +282,113 @@ class _DashboardBody extends StatelessWidget {
   }
 }
 
+class _StatusPill extends StatelessWidget {
+  final String status;
+  const _StatusPill({required this.status});
 
+  @override
+  Widget build(BuildContext context) {
+    final s = status.trim().toUpperCase();
+    Color bg = const Color(0xFFF2F2F2);
+    Color fg = const Color(0xFF444444);
+    IconData icon = Icons.info_rounded;
+    String label = status;
+
+    if (s == "PENDING") {
+      bg = const Color(0xFFFFF6E5);
+      fg = const Color(0xFFB26A00);
+      icon = Icons.schedule_rounded;
+      label = "PENDIENTE";
+    } else if (s == "IN_PROGRESS" || s == "ACTIVE" || s == "STARTED") {
+      bg = const Color(0xFFEAF2FF);
+      fg = const Color(0xFF1E5BB8);
+      icon = Icons.play_circle_fill_rounded;
+      label = "EN CURSO";
+    } else if (s == "COMPLETED" || s == "DONE") {
+      bg = const Color(0xFFEAF9F1);
+      fg = const Color(0xFF16794D);
+      icon = Icons.check_circle_rounded;
+      label = "COMPLETADO";
+    } else if (s.contains("SIN ASSIGNMENT")) {
+      bg = const Color(0xFFF2F2F2);
+      fg = const Color(0xFF444444);
+      icon = Icons.remove_circle_outline_rounded;
+      label = "SIN RUTA";
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: fg.withOpacity(.20)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: fg),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: fg,
+              fontWeight: FontWeight.w900,
+              fontSize: 12,
+              letterSpacing: .2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MetaRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _MetaRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(.03),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.black.withOpacity(.06)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: Colors.black.withOpacity(.75)),
+          const SizedBox(width: 10),
+          Text(
+            "$label: ",
+            style: TextStyle(
+              fontWeight: FontWeight.w800,
+              color: Colors.black.withOpacity(.70),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                fontWeight: FontWeight.w900,
+                color: Colors.black,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class _MyLocationMap extends StatefulWidget {
   const _MyLocationMap();
@@ -219,6 +413,7 @@ class _MyLocationMapState extends State<_MyLocationMap> {
         perm == LocationPermission.deniedForever) return;
 
     final pos = await Geolocator.getCurrentPosition();
+    if (!mounted) return;
     setState(() {
       _myPos = LatLng(pos.latitude, pos.longitude);
     });
@@ -252,7 +447,6 @@ class _MyLocationMapState extends State<_MyLocationMap> {
   }
 }
 
-
 class _AssignmentsListCard extends StatefulWidget {
   final List<AssignmentEntity> assignments;
   final AssignmentEntity? active;
@@ -273,57 +467,106 @@ class _AssignmentsListCardState extends State<_AssignmentsListCard>
   @override
   Widget build(BuildContext context) {
     if (widget.assignments.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.all(16),
-        child: Text("No tienes asignaciones"),
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.black.withOpacity(.06)),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 18,
+              offset: const Offset(0, 10),
+              color: Colors.black.withOpacity(.06),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              height: 46,
+              width: 46,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.teal.withOpacity(.12),
+              ),
+              child: const Icon(Icons.route_rounded, color: Colors.teal),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                "No tienes asignaciones",
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  color: Colors.black.withOpacity(.85),
+                ),
+              ),
+            ),
+          ],
+        ),
       );
     }
 
     final visible =
         _showAll ? widget.assignments : widget.assignments.take(2).toList();
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Expanded(
-                  child: Text(
-                    "Mis asignaciones",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.black.withOpacity(.06)),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+            color: Colors.black.withOpacity(.06),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  "Mis asignaciones",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.black,
                   ),
                 ),
-                if (widget.assignments.length > 2)
-                  TextButton(
-                    onPressed: () {
-                      setState(() => _showAll = !_showAll);
-                    },
-                    child: Text(_showAll ? "Ver menos" : "Ver más"),
-                  ),
-              ],
-            ),
-            AnimatedSize(
-              duration: const Duration(milliseconds: 250),
-              child: Column(
-                children: visible
-                    .map(
-                      (a) => _AssignmentTile(
-                        assignment: a,
-                        isActive: widget.active != null &&
-                            widget.active!.id == a.id,
-                      ),
-                    )
-                    .toList(),
               ),
+              if (widget.assignments.length > 2)
+                TextButton(
+                  onPressed: () {
+                    setState(() => _showAll = !_showAll);
+                  },
+                  child: Text(
+                    _showAll ? "Ver menos" : "Ver más",
+                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 250),
+            child: Column(
+              children: visible
+                  .map(
+                    (a) => _AssignmentTile(
+                      assignment: a,
+                      isActive:
+                          widget.active != null && widget.active!.id == a.id,
+                    ),
+                  )
+                  .toList(),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -340,7 +583,10 @@ class _AssignmentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    final bg = isActive ? Colors.blue.withOpacity(0.10) : Colors.black.withOpacity(.03);
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
       onTap: () {
         Navigator.pushNamed(
           context,
@@ -350,22 +596,41 @@ class _AssignmentTile extends StatelessWidget {
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isActive ? Colors.blue.withOpacity(0.10) : Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(12),
+          color: bg,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.black.withOpacity(.06)),
         ),
         child: Row(
           children: [
+            Container(
+              height: 38,
+              width: 38,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isActive ? Colors.blue.withOpacity(.15) : Colors.black.withOpacity(.06),
+              ),
+              child: Icon(
+                Icons.route_rounded,
+                color: isActive ? Colors.blue.shade700 : Colors.black.withOpacity(.75),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 assignment.route,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: Colors.black,
+                ),
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, size: 16),
+            const SizedBox(width: 8),
+            Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black.withOpacity(.55)),
           ],
         ),
       ),

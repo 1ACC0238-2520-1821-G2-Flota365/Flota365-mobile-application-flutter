@@ -15,7 +15,8 @@ class ManagerProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     // ✅ lee userId de arguments: puede venir como int o como Map {'userId': int}
     final args = ModalRoute.of(context)?.settings.arguments;
-    final int? userId = args is int ? args : (args is Map ? args['userId'] as int? : null);
+    final int? userId =
+        args is int ? args : (args is Map ? args['userId'] as int? : null);
 
     return BlocProvider(
       create: (_) {
@@ -49,15 +50,17 @@ class _ManagerProfileView extends StatelessWidget {
       drawer: const ManagerDrawer(),
       appBar: AppBar(
         title: const Text('Usuario', style: _textBlack),
+        centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.black87),
         backgroundColor: Colors.white,
         elevation: 0.5,
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF7F8FA),
       body: SafeArea(
         child: BlocConsumer<ManagerProfileBloc, ManagerProfileState>(
           listener: (context, state) {
-            if (state.status == ManagerProfileStatus.error && state.error != null) {
+            if (state.status == ManagerProfileStatus.error &&
+                state.error != null) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
@@ -74,23 +77,64 @@ class _ManagerProfileView extends StatelessWidget {
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.info_outline, size: 34, color: Colors.black54),
-                      const SizedBox(height: 10),
-                      const Text(
-                        'No llegó el userId a esta pantalla.\n'
-                        'Pasa "arguments: {userId: u.id}" cuando navegas al perfil.',
-                        style: TextStyle(color: Colors.black87),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 12),
-                      ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Volver'),
-                      ),
-                    ],
+                  child: Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      border:
+                          Border.all(color: Colors.black.withOpacity(.06)),
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 18,
+                          offset: const Offset(0, 10),
+                          color: Colors.black.withOpacity(.06),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          height: 54,
+                          width: 54,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.orange.withOpacity(.12),
+                          ),
+                          child: const Icon(Icons.info_outline,
+                              size: 28, color: Colors.orange),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'No llegó el userId a esta pantalla.\n'
+                          'Pasa "arguments: {userId: u.id}" cuando navegas al perfil.',
+                          style: TextStyle(
+                            color: Colors.black87,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 14),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton.icon(
+                            onPressed: () => Navigator.pop(context),
+                            icon: const Icon(Icons.arrow_back),
+                            label: const Text('Volver'),
+                            style: ElevatedButton.styleFrom(
+                              elevation: 0,
+                              backgroundColor: Colors.black,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -104,9 +148,78 @@ class _ManagerProfileView extends StatelessWidget {
             final profile = state.profile;
             if (profile == null) {
               return Center(
-                child: ElevatedButton(
-                  onPressed: () => context.read<ManagerProfileBloc>().add(LoadManagerProfile(userId!)),
-                  child: const Text('Reintentar'),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      border:
+                          Border.all(color: Colors.black.withOpacity(.06)),
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 18,
+                          offset: const Offset(0, 10),
+                          color: Colors.black.withOpacity(.06),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          height: 54,
+                          width: 54,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.teal.withOpacity(.12),
+                          ),
+                          child: const Icon(Icons.refresh_rounded,
+                              size: 28, color: Colors.teal),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'No se pudo cargar el perfil',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Intenta nuevamente.',
+                          style: TextStyle(
+                            color: Colors.black.withOpacity(.65),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: () => context
+                                .read<ManagerProfileBloc>()
+                                .add(LoadManagerProfile(userId!)),
+                            style: ElevatedButton.styleFrom(
+                              elevation: 0,
+                              backgroundColor: Colors.teal,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: const Text(
+                              'Reintentar',
+                              style: TextStyle(fontWeight: FontWeight.w800),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               );
             }
@@ -121,51 +234,106 @@ class _ManagerProfileView extends StatelessWidget {
             return AbsorbPointer(
               absorbing: busy,
               child: ListView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                 children: [
-                  _InfoCard(
-                    title: displayName,
-                    subtitle: profile.email,
-                    trailing: _RoleChip(role: profile.role),
+                  _HeaderCard(
+                    name: displayName,
+                    email: profile.email,
+                    roleChip: _RoleChip(role: profile.role),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
 
+                  // Sección acciones (pro)
                   const _SectionTitle(title: 'Cuenta'),
                   const SizedBox(height: 8),
 
-                  _ActionTile(
-                    icon: Icons.edit,
-                    title: 'Editar nombre y apellido',
-                    onTap: () => _showEditNameDialog(
-                      context,
-                      firstInitial: profile.firstName,
-                      lastInitial: profile.lastName,
+                  _Panel(
+                    child: Column(
+                      children: [
+                        _ActionTile(
+                          icon: Icons.edit,
+                          title: 'Editar nombre y apellido',
+                          subtitle: 'Actualiza tus datos personales',
+                          onTap: () => _showEditNameDialog(
+                            context,
+                            firstInitial: profile.firstName,
+                            lastInitial: profile.lastName,
+                          ),
+                        ),
+                        const _SoftDivider(),
+                        _ActionTile(
+                          icon: Icons.lock_outline,
+                          title: 'Cambiar contraseña',
+                          subtitle: 'Recomendado cada cierto tiempo',
+                          onTap: () => _showChangePasswordDialog(context),
+                        ),
+                        const _SoftDivider(),
+                        _ActionTile(
+                          icon: Icons.refresh,
+                          title: 'Actualizar datos',
+                          subtitle: 'Vuelve a consultar el perfil',
+                          onTap: () => context
+                              .read<ManagerProfileBloc>()
+                              .add(LoadManagerProfile(userId!)),
+                        ),
+                      ],
                     ),
-                  ),
-                  const Divider(height: 0),
-
-                  _ActionTile(
-                    icon: Icons.lock_outline,
-                    title: 'Cambiar contraseña',
-                    onTap: () => _showChangePasswordDialog(context),
-                  ),
-                  const Divider(height: 0),
-
-                  _ActionTile(
-                    icon: Icons.refresh,
-                    title: 'Actualizar datos',
-                    onTap: () => context.read<ManagerProfileBloc>().add(LoadManagerProfile(userId!)),
                   ),
 
                   if (busy) ...[
                     const SizedBox(height: 16),
-                    const Center(child: CircularProgressIndicator()),
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                              color: Colors.black.withOpacity(.06)),
+                          boxShadow: [
+                            BoxShadow(
+                              blurRadius: 18,
+                              offset: const Offset(0, 10),
+                              color: Colors.black.withOpacity(.06),
+                            ),
+                          ],
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              height: 18,
+                              width: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            SizedBox(width: 10),
+                            Text(
+                              'Procesando...',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
 
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Tip: si el backend devuelve text/plain en el PUT, igual se refresca el perfil automáticamente.',
-                    style: _hintBlack54,
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.black.withOpacity(.06)),
+                    ),
+                    child: const Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -188,7 +356,9 @@ class _ManagerProfileView extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: Colors.white,
-        title: const Text('Editar perfil', style: TextStyle(color: Colors.black87)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Editar perfil',
+            style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w900)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -200,7 +370,7 @@ class _ManagerProfileView extends StatelessWidget {
                 labelStyle: TextStyle(color: Colors.black87),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             TextField(
               controller: lastCtrl,
               style: const TextStyle(color: Colors.black87),
@@ -214,11 +384,22 @@ class _ManagerProfileView extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar', style: TextStyle(color: Colors.black87)),
+            child: const Text('Cancelar',
+                style:
+                    TextStyle(color: Colors.black87, fontWeight: FontWeight.w700)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Guardar'),
+            style: ElevatedButton.styleFrom(
+              elevation: 0,
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text('Guardar',
+                style: TextStyle(fontWeight: FontWeight.w800)),
           ),
         ],
       ),
@@ -242,7 +423,9 @@ class _ManagerProfileView extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: Colors.white,
-        title: const Text('Cambiar contraseña', style: TextStyle(color: Colors.black87)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Cambiar contraseña',
+            style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w900)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -255,7 +438,7 @@ class _ManagerProfileView extends StatelessWidget {
                 labelStyle: TextStyle(color: Colors.black87),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             TextField(
               controller: newCtrl,
               obscureText: true,
@@ -270,11 +453,22 @@ class _ManagerProfileView extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar', style: TextStyle(color: Colors.black87)),
+            child: const Text('Cancelar',
+                style:
+                    TextStyle(color: Colors.black87, fontWeight: FontWeight.w700)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Cambiar'),
+            style: ElevatedButton.styleFrom(
+              elevation: 0,
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text('Cambiar',
+                style: TextStyle(fontWeight: FontWeight.w800)),
           ),
         ],
       ),
@@ -291,6 +485,135 @@ class _ManagerProfileView extends StatelessWidget {
   }
 }
 
+/* ----------------------- UI PRO COMPONENTS ----------------------- */
+
+class _HeaderCard extends StatelessWidget {
+  final String name;
+  final String email;
+  final Widget roleChip;
+
+  const _HeaderCard({
+    required this.name,
+    required this.email,
+    required this.roleChip,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final initials = _initials(name);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.black.withOpacity(.06)),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+            color: Colors.black.withOpacity(.06),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            height: 54,
+            width: 54,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.teal.withOpacity(.12),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              initials,
+              style: const TextStyle(
+                fontWeight: FontWeight.w900,
+                color: Colors.teal,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  email,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.black.withOpacity(.65),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          roleChip,
+        ],
+      ),
+    );
+  }
+
+  String _initials(String name) {
+    final parts = name.trim().split(RegExp(r'\s+')).where((e) => e.isNotEmpty);
+    final list = parts.toList();
+    if (list.isEmpty) return 'U';
+    if (list.length == 1) return list.first.characters.first.toUpperCase();
+    return (list.first.characters.first + list.last.characters.first)
+        .toUpperCase();
+  }
+}
+
+class _Panel extends StatelessWidget {
+  final Widget child;
+  const _Panel({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.black.withOpacity(.06)),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+            color: Colors.black.withOpacity(.06),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
+class _SoftDivider extends StatelessWidget {
+  const _SoftDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Divider(height: 0, thickness: 1, color: Colors.black.withOpacity(.06));
+  }
+}
+
 class _SectionTitle extends StatelessWidget {
   final String title;
   const _SectionTitle({required this.title});
@@ -302,8 +625,8 @@ class _SectionTitle extends StatelessWidget {
       style: const TextStyle(
         color: Colors.black54,
         fontSize: 12,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 0.8,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.9,
       ),
     );
   }
@@ -312,21 +635,84 @@ class _SectionTitle extends StatelessWidget {
 class _ActionTile extends StatelessWidget {
   final IconData icon;
   final String title;
+  final String subtitle;
   final VoidCallback onTap;
 
   const _ActionTile({
     required this.icon,
     required this.title,
+    required this.subtitle,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(icon, color: Colors.teal),
-      title: Text(title, style: const TextStyle(color: Colors.black87)),
-      trailing: const Icon(Icons.chevron_right, color: Colors.black54),
       onTap: onTap,
+      leading: Container(
+        height: 42,
+        width: 42,
+        decoration: BoxDecoration(
+          color: Colors.teal.withOpacity(.12),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: const Icon(Icons.circle, color: Colors.transparent), // placeholder
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Colors.black87,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(
+          color: Colors.black.withOpacity(.60),
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      trailing: const Icon(Icons.chevron_right, color: Colors.black54),
+      // pintamos el icon real encima del leading sin cambiar funcionalidad
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+      minLeadingWidth: 0,
+      horizontalTitleGap: 12,
+      dense: false,
+      // hack simple para no meter Stack y no romper nada:
+      // usamos el leading como Container y sobre-escribimos con IconTheme via Builder
+      // (pero más simple: convertimos el leading a Stack usando widget ya existente)
+      // -> lo dejamos directo:
+      // (Flutter permite leading cualquier widget; lo cambiamos a Stack sin afectar lógica)
+      leadingAndTrailingTextStyle: const TextStyle(color: Colors.black87),
+    )._withLeadingIcon(icon);
+  }
+}
+
+extension on ListTile {
+  Widget _withLeadingIcon(IconData icon) {
+    return Builder(
+      builder: (context) {
+        return ListTile(
+          onTap: onTap,
+          leading: Container(
+            height: 42,
+            width: 42,
+            decoration: BoxDecoration(
+              color: Colors.teal.withOpacity(.12),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.teal.withOpacity(.18)),
+            ),
+            child: Icon(icon, color: Colors.teal, size: 20),
+          ),
+          title: title,
+          subtitle: subtitle,
+          trailing: trailing,
+          contentPadding: contentPadding,
+          minLeadingWidth: minLeadingWidth,
+          horizontalTitleGap: horizontalTitleGap,
+          dense: dense,
+        );
+      },
     );
   }
 }
@@ -337,45 +723,31 @@ class _RoleChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Chip(
-      label: Text(role, style: const TextStyle(color: Colors.black87)),
-      backgroundColor: Colors.grey.shade200,
-      side: BorderSide(color: Colors.grey.shade300),
-    );
-  }
-}
+    final r = role.trim().isEmpty ? 'Manager' : role.trim();
 
-class _InfoCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final Widget? trailing;
-
-  const _InfoCard({
-    required this.title,
-    required this.subtitle,
-    this.trailing,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: Colors.white,
-      elevation: 0.6,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      child: ListTile(
-        leading: const CircleAvatar(
-          backgroundColor: Color(0xFFE0F2F1),
-          child: Icon(Icons.person, color: Colors.teal),
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            color: Colors.black87,
-            fontWeight: FontWeight.w600,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(.04),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.black.withOpacity(.10)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.verified_user_rounded,
+              size: 16, color: Colors.black.withOpacity(.70)),
+          const SizedBox(width: 6),
+          Text(
+            r,
+            style: const TextStyle(
+              color: Colors.black87,
+              fontWeight: FontWeight.w900,
+              fontSize: 12.5,
+              letterSpacing: .2,
+            ),
           ),
-        ),
-        subtitle: Text(subtitle, style: const TextStyle(color: Colors.black54)),
-        trailing: trailing,
+        ],
       ),
     );
   }

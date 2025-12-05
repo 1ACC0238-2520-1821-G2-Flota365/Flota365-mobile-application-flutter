@@ -69,19 +69,19 @@ class _AssignmentFormPageState extends State<AssignmentFormPage> {
   // ✅ DECORACIÓN "WHITE TEXT"
   // ==========================
   InputDecoration _whiteInput(String label) {
-    const borderColor = Colors.white70;
+    const borderColor = Colors.black54;
 
     return InputDecoration(
       labelText: label,
-      labelStyle: const TextStyle(color: Colors.white70),
-      hintStyle: const TextStyle(color: Colors.white54),
+      labelStyle: const TextStyle(color: Colors.black54),
+      hintStyle: const TextStyle(color: Colors.black45),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: borderColor, width: 1),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Colors.white, width: 1.6),
+        borderSide: const BorderSide(color: Colors.black54, width: 1.6),
       ),
     );
   }
@@ -110,8 +110,8 @@ class _AssignmentFormPageState extends State<AssignmentFormPage> {
                       child: DropdownButtonFormField<int>(
                         decoration: _whiteInput("Vehículo"),
                         value: selectedVehicle,
-                        dropdownColor: const Color(0xFF1F2937), // menú oscuro
-                        iconEnabledColor: Colors.white,
+                        dropdownColor: const Color.fromARGB(255, 105, 131, 167), // menú oscuro
+                        iconEnabledColor: Colors.black,
                         style: blackStyle, // texto seleccionado (blanco)
                         items: vehicles
                             .map(
@@ -140,8 +140,8 @@ class _AssignmentFormPageState extends State<AssignmentFormPage> {
                       child: DropdownButtonFormField<int>(
                         decoration: _whiteInput("Conductor"),
                         value: selectedDriver,
-                        dropdownColor: const Color(0xFF1F2937),
-                        iconEnabledColor: Colors.white,
+                        dropdownColor: const Color.fromARGB(255, 105, 131, 167),
+                        iconEnabledColor: Colors.black,
                         style: blackStyle,
                         items: drivers
                             .map(

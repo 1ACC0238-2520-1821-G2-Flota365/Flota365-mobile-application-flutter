@@ -1,4 +1,6 @@
 import 'package:flota365/core/session/app_session.dart';
+import 'package:flota365/features/driver/data/driver_repository.dart';
+import 'package:flota365/features/driver/data/driver_service.dart';
 import 'package:flota365/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -58,17 +60,34 @@ class _LoginViewState extends State<_LoginView> {
                     final int driverId = u.id;
 
                     if (role == 'conductor' || role == 'driver') {
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        '/driver/home',
-                        (_) => false,
-                        arguments: {
-                          'driverId': driverId,
-                          'fullName': u.fullName,
-                          'email': u.email,
-                        },
-                      );
-                    } else if (role.contains('manager')) {
+                        final driverRepo = DriverRepository(DriverService());
+
+                        // ✅ Buscar el driver real por email
+                        final driver = await driverRepo.findDriverByEmail(u.email);
+
+                        // Si no existe, lo crea (para no romper flujo)
+                        final ensured = driver ??
+                            await driverRepo.ensureDriverForEmail(
+                              email: u.email,
+                              fullName: u.fullName,
+                            );
+
+                        final int driverId = ensured['id'] is int
+                            ? ensured['id']
+                            : int.tryParse(ensured['id'].toString()) ?? 0;
+
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          '/driver/home',
+                          (_) => false,
+                          arguments: {
+                            'driverId': driverId, // ✅ ahora sí es Driver.id
+                            'fullName': u.fullName,
+                            'email': u.email,
+                          },
+                        );
+                      }
+                      else if (role.contains('manager')) {
                           AppSession.userId = u.id; // ✅ guardar ID del usuario logueado
 
                           // MANAGER

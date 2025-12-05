@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import '../../../core/constants/api_paths.dart';
 import '../../../core/network/dio_client.dart';
 
@@ -51,9 +52,26 @@ class DriverService {
   }
 
   // GET ALL ASSIGNMENTS
-  Future<Response> getAssignments() {
-    return _dio.get(ApiPaths.assignment);
+  Future<Response> getAssignments() async {
+  try {
+    final res = await _dio.get(ApiPaths.assignment);
+    debugPrint("GET ${ApiPaths.assignment} => ${res.statusCode}");
+    debugPrint("Assignments data type => ${res.data.runtimeType}");
+    if (res.data is List) {
+      debugPrint("Assignments count => ${(res.data as List).length}");
+      if ((res.data as List).isNotEmpty) {
+        debugPrint("Assignment[0] => ${(res.data as List).first}");
+      }
+    } else {
+      debugPrint("Assignments body => ${res.data}");
+    }
+    return res;
+  } catch (e) {
+    debugPrint("GET ${ApiPaths.assignment} ERROR => $e");
+    rethrow;
   }
+}
+
 
   // GET ASSIGNMENT DETAIL
   Future<Response> getAssignmentById(int id) {

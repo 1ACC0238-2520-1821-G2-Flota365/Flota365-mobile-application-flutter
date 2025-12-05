@@ -65,7 +65,7 @@ class ReportsHubPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           const SizedBox(height: 4),
-          Text("Centro de Reportes", style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+          Text("Centro de Reportes", style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800, color: Colors.black)),
           const SizedBox(height: 6),
           Text("Gestiona mantenimiento e incidencias en un solo lugar.",
               style: TextStyle(color: Colors.grey.shade700)),

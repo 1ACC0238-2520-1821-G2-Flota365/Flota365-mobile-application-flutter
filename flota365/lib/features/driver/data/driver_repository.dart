@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import 'driver_service.dart';
 
 class DriverRepository {
@@ -108,21 +110,42 @@ class DriverRepository {
 
   // ---------------------- ASSIGNMENTS ----------------------
 
-  Future<List<Map<String, dynamic>>> getAssignmentsForDriver(int driverId) async {
-    final r = await _service.getAssignments();
-    final data = r.data;
+ Future<List<Map<String, dynamic>>> getAssignmentsForDriver(int driverId) async {
+  final r = await _service.getAssignments();
+  final data = r.data;
 
-    if (data is List) {
-      final list = data
-          .where((e) => e is Map)
-          .map((e) => Map<String, dynamic>.from(e))
-          .toList();
+  if (data is! List) return [];
 
-      return list.where((e) => e['driverId'] == driverId).toList();
-    }
-
-    return [];
+  int toInt(dynamic v) {
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    return int.tryParse(v?.toString() ?? '') ?? -1;
   }
+
+  int pickDriverId(Map<String, dynamic> e) {
+    // intenta varias llaves por si el backend cambia naming
+    if (e.containsKey('driverId')) return toInt(e['driverId']);
+    if (e.containsKey('driverID')) return toInt(e['driverID']);
+    if (e.containsKey('driver_id')) return toInt(e['driver_id']);
+    if (e.containsKey('DriverId')) return toInt(e['DriverId']);
+    return -1;
+  }
+
+  final list = data
+      .where((e) => e is Map)
+      .map((e) => Map<String, dynamic>.from(e as Map))
+      .toList();
+
+  // DEBUG útil (no rompe nada)
+  debugPrint("ASSIGNMENTS TOTAL => ${list.length}");
+  if (list.isNotEmpty) {
+    debugPrint("ASSIGNMENT[0] KEYS => ${list.first.keys.toList()}");
+    debugPrint("ASSIGNMENT[0] driverId => ${list.first['driverId']} (${list.first['driverId']?.runtimeType})");
+  }
+  debugPrint("FILTER driverId => $driverId");
+
+  return list.where((e) => pickDriverId(e) == driverId).toList();
+}
 
   Future<Map<String, dynamic>?> getAssignmentDetail(int id) async {
   final r = await _service.getAssignments();
@@ -174,4 +197,38 @@ class DriverRepository {
   }) {
     return _service.putCheckOut(assignmentId, payload);
   }
+
+
+  Future<Map<String, dynamic>> createDriverFull({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String licenseNumber,
+    required String licenseExpiryDate,
+    required String phone,
+    required int experienceYears,
+  }) async {
+    final payload = {
+    "code": "DRV-${DateTime.now().millisecondsSinceEpoch}",
+    "firstName": firstName,
+    "lastName": lastName,
+    "licenseNumber": licenseNumber,
+    "licenseExpiryDate": licenseExpiryDate, 
+    "phone": phone,
+    "email": email,
+    "experienceYears": experienceYears,
+  };
+
+
+  final r = await _service.createDriver(payload);
+  final data = r.data;
+
+  if (data is Map) {
+    return Map<String, dynamic>.from(data);
+  }
+
+  throw Exception("No se pudo crear driver");
+}
+
+
 }

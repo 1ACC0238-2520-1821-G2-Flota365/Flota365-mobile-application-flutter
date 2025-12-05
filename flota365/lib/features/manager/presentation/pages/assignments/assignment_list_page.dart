@@ -25,8 +25,70 @@ class AssignmentListPage extends StatelessWidget {
   }
 }
 
-class _AssignmentListView extends StatelessWidget {
+/// Filtros disponibles (UI local). No toca backend/BLoC.
+enum _AssignmentFilter { all, pending, inProgress, completed }
+
+class _AssignmentListView extends StatefulWidget {
   const _AssignmentListView();
+
+  @override
+  State<_AssignmentListView> createState() => _AssignmentListViewState();
+}
+
+class _AssignmentListViewState extends State<_AssignmentListView> {
+  _AssignmentFilter _filter = _AssignmentFilter.all;
+
+  bool _matchFilter(AssignmentEntity a) {
+    final s = a.status.trim().toUpperCase();
+    switch (_filter) {
+      case _AssignmentFilter.all:
+        return true;
+      case _AssignmentFilter.pending:
+        return s == "PENDING";
+      case _AssignmentFilter.inProgress:
+        return s == "IN_PROGRESS" || s == "STARTED";
+      case _AssignmentFilter.completed:
+        return s == "COMPLETED" || s == "DONE";
+    }
+  }
+
+  String _filterText(_AssignmentFilter f) {
+    switch (f) {
+      case _AssignmentFilter.all:
+        return "Todas";
+      case _AssignmentFilter.pending:
+        return "Pendiente";
+      case _AssignmentFilter.inProgress:
+        return "En curso";
+      case _AssignmentFilter.completed:
+        return "Completado";
+    }
+  }
+
+  IconData _filterIcon(_AssignmentFilter f) {
+    switch (f) {
+      case _AssignmentFilter.all:
+        return Icons.list_alt_rounded;
+      case _AssignmentFilter.pending:
+        return Icons.schedule_rounded;
+      case _AssignmentFilter.inProgress:
+        return Icons.play_circle_fill_rounded;
+      case _AssignmentFilter.completed:
+        return Icons.check_circle_rounded;
+    }
+  }
+
+  void _goCreate(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BlocProvider.value(
+          value: context.read<AssignmentBloc>(),
+          child: const AssignmentFormPage(),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,31 +108,177 @@ class _AssignmentListView extends StatelessWidget {
             return _EmptyState(
               title: "No hay rutas registradas",
               subtitle: "Crea una asignación para empezar a operar.",
-              onCreate: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BlocProvider.value(
-                      value: context.read<AssignmentBloc>(),
-                      child: const AssignmentFormPage(),
-                    ),
-                  ),
-                );
-              },
+              onCreate: () => _goCreate(context),
             );
           }
+
+          final filtered = state.assignments.where(_matchFilter).toList();
 
           return RefreshIndicator(
             onRefresh: () async {
               context.read<AssignmentBloc>().add(LoadAssignments());
             },
-            child: ListView.separated(
-              padding: const EdgeInsets.fromLTRB(14, 14, 14, 100),
-              itemCount: state.assignments.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (_, i) {
-                return _AssignmentTile(assignment: state.assignments[i]);
-              },
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                // Header pro: filtros + contador
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                            border:
+                                Border.all(color: Colors.black.withOpacity(.06)),
+                            boxShadow: [
+                              BoxShadow(
+                                blurRadius: 18,
+                                offset: const Offset(0, 10),
+                                color: Colors.black.withOpacity(.06),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Título + contador
+                              Row(
+                                children: [
+                                  const Expanded(
+                                    child: Text(
+                                      "Filtros",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(.04),
+                                      borderRadius: BorderRadius.circular(999),
+                                      border: Border.all(
+                                          color: Colors.black.withOpacity(.08)),
+                                    ),
+                                    child: Text(
+                                      "Mostrando ${filtered.length} de ${state.assignments.length}",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 12,
+                                        color: Colors.black.withOpacity(.75),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+
+                              // Chips tipo segmented control
+                              Wrap(
+                                spacing: 10,
+                                runSpacing: 10,
+                                children: _AssignmentFilter.values.map((f) {
+                                  final selected = _filter == f;
+                                  return InkWell(
+                                    borderRadius: BorderRadius.circular(999),
+                                    onTap: () => setState(() => _filter = f),
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 180),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 10),
+                                      decoration: BoxDecoration(
+                                        color: selected
+                                            ? Colors.black
+                                            : Colors.black.withOpacity(.04),
+                                        borderRadius: BorderRadius.circular(999),
+                                        border: Border.all(
+                                          color: selected
+                                              ? Colors.black
+                                              : Colors.black.withOpacity(.10),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            _filterIcon(f),
+                                            size: 18,
+                                            color: selected
+                                                ? Colors.white
+                                                : Colors.black.withOpacity(.75),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            _filterText(f),
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w900,
+                                              fontSize: 13,
+                                              color: selected
+                                                  ? Colors.white
+                                                  : Colors.black.withOpacity(.85),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        if (filtered.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 12),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: Colors.amber.withOpacity(.12),
+                                borderRadius: BorderRadius.circular(16),
+                                border:
+                                    Border.all(color: Colors.amber.withOpacity(.30)),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.info_rounded),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      "No hay rutas con estado “${_filterText(_filter)}”.",
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w700),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Lista
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(14, 0, 14, 100),
+                  sliver: SliverList.separated(
+                    itemCount: filtered.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (_, i) {
+                      return _AssignmentTile(assignment: filtered[i]);
+                    },
+                  ),
+                ),
+              ],
             ),
           );
         },
@@ -78,17 +286,7 @@ class _AssignmentListView extends StatelessWidget {
       floatingActionButton: FloatingActionButton.extended(
         icon: const Icon(Icons.add),
         label: const Text("Nueva ruta"),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => BlocProvider.value(
-                value: context.read<AssignmentBloc>(),
-                child: const AssignmentFormPage(),
-              ),
-            ),
-          );
-        },
+        onPressed: () => _goCreate(context),
       ),
     );
   }
@@ -110,7 +308,7 @@ class _AssignmentTile extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (_) => BlocProvider.value(
-              value: context.read<AssignmentBloc>(), // REUSA EL MISMO BLOC!
+              value: context.read<AssignmentBloc>(), // REUSA EL MISMO BLOC
               child: AssignmentDetailPage(assignmentId: assignment.id),
             ),
           ),
@@ -336,8 +534,10 @@ class _EmptyState extends StatelessWidget {
                 icon: const Icon(Icons.add),
                 label: const Text("Crear ruta"),
                 style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),

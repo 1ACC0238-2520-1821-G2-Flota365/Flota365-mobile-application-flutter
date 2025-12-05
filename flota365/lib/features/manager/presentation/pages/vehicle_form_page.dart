@@ -41,10 +41,33 @@ class _VehicleFormPageState extends State<VehicleFormPage> {
 
   // ✅ SOLO UI: asegura texto negro al escribir
   TextStyle get _inputTextStyle => const TextStyle(color: Colors.black);
-  InputDecoration _inputDeco(String label) => InputDecoration(
+
+  InputDecoration _inputDeco(
+    String label, {
+    String? helper,
+    IconData? icon,
+  }) =>
+      InputDecoration(
         labelText: label,
+        helperText: helper,
+        prefixIcon: icon != null ? Icon(icon) : null,
         labelStyle: const TextStyle(color: Colors.black87),
         hintStyle: const TextStyle(color: Colors.black45),
+        filled: true,
+        fillColor: Colors.black.withOpacity(.03),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.black.withOpacity(.10)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.black.withOpacity(.10)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.black.withOpacity(.35), width: 1.2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       );
 
   @override
@@ -127,75 +150,175 @@ class _VehicleFormPageState extends State<VehicleFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    final title = isEdit ? 'Editar vehículo' : 'Nuevo vehículo';
+    final cta = isEdit ? 'Guardar cambios' : 'Crear vehículo';
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(isEdit ? 'Editar vehículo' : 'Nuevo vehículo'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      appBar: AppBar(title: Text(title)),
+      body: SafeArea(
         child: Form(
           key: _formKey,
-          child: isEdit ? _buildEditForm() : _buildCreateForm(),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 560),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _HeaderCard(
+                          title: title,
+                          subtitle: isEdit
+                              ? "Actualiza información del vehículo."
+                              : "Registra un nuevo vehículo en tu flota.",
+                          icon: isEdit ? Icons.edit_rounded : Icons.directions_car_rounded,
+                        ),
+                        const SizedBox(height: 14),
+
+                        Card(
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(color: Colors.black.withOpacity(.06)),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: isEdit ? _buildEditForm() : _buildCreateForm(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
         ),
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16),
-        child: ElevatedButton(
-          onPressed: _submit,
-          child: Text(isEdit ? 'Guardar cambios' : 'Crear vehículo'),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+          child: SizedBox(
+            height: 52,
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _submit,
+              icon: Icon(isEdit ? Icons.save_rounded : Icons.add_rounded),
+              label: Text(cta),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 
+  // ---------- CREATE ----------
   Widget _buildCreateForm() {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          TextFormField(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _SectionTitle(
+          title: "Datos del vehículo",
+          subtitle: "Completa placa, marca, modelo y métricas.",
+        ),
+        const SizedBox(height: 12),
+
+        _Field(
+          child: TextFormField(
             controller: _plateCtrl,
             style: _inputTextStyle,
             cursorColor: Colors.black,
-            decoration: _inputDeco('Placa'),
+            textInputAction: TextInputAction.next,
+            decoration: _inputDeco('Placa', icon: Icons.confirmation_number_rounded),
             validator: (v) => (v == null || v.isEmpty) ? 'Ingresa la placa' : null,
           ),
-          TextFormField(
+        ),
+        _Field(
+          child: TextFormField(
             controller: _brandCtrl,
             style: _inputTextStyle,
             cursorColor: Colors.black,
-            decoration: _inputDeco('Marca'),
+            textInputAction: TextInputAction.next,
+            decoration: _inputDeco('Marca', icon: Icons.branding_watermark_rounded),
             validator: (v) => (v == null || v.isEmpty) ? 'Ingresa la marca' : null,
           ),
-          TextFormField(
+        ),
+        _Field(
+          child: TextFormField(
             controller: _modelCtrl,
             style: _inputTextStyle,
             cursorColor: Colors.black,
-            decoration: _inputDeco('Modelo'),
+            textInputAction: TextInputAction.next,
+            decoration: _inputDeco('Modelo', icon: Icons.directions_car_filled_rounded),
             validator: (v) => (v == null || v.isEmpty) ? 'Ingresa el modelo' : null,
           ),
-          TextFormField(
-            controller: _yearCtrl,
-            style: _inputTextStyle,
-            cursorColor: Colors.black,
-            decoration: _inputDeco('Año'),
-            keyboardType: TextInputType.number,
-            validator: (v) => (v == null || int.tryParse(v) == null) ? 'Año inválido' : null,
-          ),
-          TextFormField(
-            controller: _mileageCtrl,
-            style: _inputTextStyle,
-            cursorColor: Colors.black,
-            decoration: _inputDeco('Kilometraje'),
-            keyboardType: TextInputType.number,
-            validator: (v) => (v == null || int.tryParse(v) == null) ? 'Kilometraje inválido' : null,
-          ),
-          TextFormField(
+        ),
+
+        Row(
+          children: [
+            Expanded(
+              child: _Field(
+                child: TextFormField(
+                  controller: _yearCtrl,
+                  style: _inputTextStyle,
+                  cursorColor: Colors.black,
+                  keyboardType: TextInputType.number,
+                  textInputAction: TextInputAction.next,
+                  decoration: _inputDeco('Año', icon: Icons.calendar_month_rounded),
+                  validator: (v) =>
+                      (v == null || int.tryParse(v) == null) ? 'Año inválido' : null,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _Field(
+                child: TextFormField(
+                  controller: _mileageCtrl,
+                  style: _inputTextStyle,
+                  cursorColor: Colors.black,
+                  keyboardType: TextInputType.number,
+                  textInputAction: TextInputAction.next,
+                  decoration: _inputDeco('Kilometraje', icon: Icons.speed_rounded),
+                  validator: (v) => (v == null || int.tryParse(v) == null)
+                      ? 'Kilometraje inválido'
+                      : null,
+                ),
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 6),
+        const Divider(height: 26),
+
+        const _SectionTitle(
+          title: "Flota",
+          subtitle: "Asocia el vehículo a una flota.",
+        ),
+        const SizedBox(height: 12),
+
+        _Field(
+          child: TextFormField(
             controller: _fleetIdCtrl,
             readOnly: widget.fleetId != null, // 👈 importante
             style: _inputTextStyle,
             cursorColor: Colors.black,
-            decoration: _inputDeco('ID de Flota'),
             keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.next,
+            decoration: _inputDeco(
+              'ID de Flota',
+              icon: Icons.groups_rounded,
+              helper: widget.fleetId != null ? "Asignado automáticamente" : null,
+            ),
             validator: (v) {
               if (widget.fleetId != null) return null; // ya viene fijo
               if (v == null || int.tryParse(v) == null) {
@@ -204,12 +327,19 @@ class _VehicleFormPageState extends State<VehicleFormPage> {
               return null;
             },
           ),
-          TextFormField(
+        ),
+        _Field(
+          child: TextFormField(
             controller: _fleetNameCtrl,
             readOnly: widget.fleetName != null, // 👈 importante
             style: _inputTextStyle,
             cursorColor: Colors.black,
-            decoration: _inputDeco('Nombre de flota'),
+            textInputAction: TextInputAction.done,
+            decoration: _inputDeco(
+              'Nombre de flota',
+              icon: Icons.badge_rounded,
+              helper: widget.fleetName != null ? "Asignado automáticamente" : null,
+            ),
             validator: (v) {
               if (widget.fleetName != null) return null; // ya viene fija
               if (v == null || v.isEmpty) {
@@ -218,35 +348,148 @@ class _VehicleFormPageState extends State<VehicleFormPage> {
               return null;
             },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
+  // ---------- EDIT ----------
   Widget _buildEditForm() {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          TextFormField(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _SectionTitle(
+          title: "Actualizar vehículo",
+          subtitle: "Edita kilometraje, estado y conductor.",
+        ),
+        const SizedBox(height: 12),
+
+        _Field(
+          child: TextFormField(
             controller: _editMileageCtrl,
             style: _inputTextStyle,
             cursorColor: Colors.black,
-            decoration: _inputDeco('Kilometraje'),
             keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.next,
+            decoration: _inputDeco('Kilometraje', icon: Icons.speed_rounded),
             validator: (v) =>
                 (v == null || int.tryParse(v) == null) ? 'Kilometraje inválido' : null,
           ),
-          TextFormField(
+        ),
+        _Field(
+          child: TextFormField(
             controller: _statusCtrl,
             style: _inputTextStyle,
             cursorColor: Colors.black,
-            decoration: _inputDeco('Estado'),
+            textInputAction: TextInputAction.next,
+            decoration: _inputDeco('Estado', icon: Icons.tune_rounded),
           ),
-          TextFormField(
+        ),
+        _Field(
+          child: TextFormField(
             controller: _driverNameCtrl,
             style: _inputTextStyle,
             cursorColor: Colors.black,
-            decoration: _inputDeco('Nombre del conductor'),
+            textInputAction: TextInputAction.done,
+            decoration: _inputDeco('Nombre del conductor', icon: Icons.person_rounded),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _Field extends StatelessWidget {
+  final Widget child;
+  const _Field({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: child,
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  const _SectionTitle({required this.title, required this.subtitle});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          subtitle,
+          style: TextStyle(color: Colors.black.withOpacity(.65), height: 1.2),
+        ),
+      ],
+    );
+  }
+}
+
+class _HeaderCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+
+  const _HeaderCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: Colors.white,
+        border: Border.all(color: Colors.black.withOpacity(.06)),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+            color: Colors.black.withOpacity(.06),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            height: 46,
+            width: 46,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.blue.withOpacity(.12),
+            ),
+            child: Icon(icon, color: Colors.blue.shade700),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(color: Colors.black.withOpacity(.65)),
+                ),
+              ],
+            ),
           ),
         ],
       ),

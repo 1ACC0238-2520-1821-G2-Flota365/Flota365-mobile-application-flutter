@@ -72,6 +72,7 @@ class _RoutesViewState extends State<_RoutesView> {
           perm == LocationPermission.deniedForever) return;
 
       final pos = await Geolocator.getCurrentPosition();
+      if (!mounted) return;
 
       setState(() {
         myLocation = LatLng(pos.latitude, pos.longitude);

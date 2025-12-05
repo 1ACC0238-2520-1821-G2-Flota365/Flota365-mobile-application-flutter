@@ -30,4 +30,15 @@ class AuthService {
   Future<Response> getProfile(int id) {
     return _dio.get(ApiPaths.authProfileId(id));
   }
+
+  // ---- CREATE DRIVER ----
+Future<Response> createDriver(Map<String, dynamic> payload) {
+  return _dio.post(
+    ApiPaths.drivers,
+    data: payload,
+    options: Options(contentType: Headers.jsonContentType),
+  );
 }
+}
+
+
