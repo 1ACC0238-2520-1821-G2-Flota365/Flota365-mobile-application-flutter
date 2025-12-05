@@ -23,8 +23,6 @@ class _AssignmentFormPageState extends State<AssignmentFormPage> {
   final routeCtrl = TextEditingController();
 
   List<VehicleEntity> vehicles = [];
-
-  // ✅ antes: List<Map<String, dynamic>> drivers = [];
   List<DriverInfo> drivers = [];
 
   bool loadingData = true;
@@ -67,8 +65,31 @@ class _AssignmentFormPageState extends State<AssignmentFormPage> {
     }
   }
 
+  // ==========================
+  // ✅ DECORACIÓN "WHITE TEXT"
+  // ==========================
+  InputDecoration _whiteInput(String label) {
+    const borderColor = Colors.white70;
+
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Colors.white70),
+      hintStyle: const TextStyle(color: Colors.white54),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: borderColor, width: 1),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Colors.white, width: 1.6),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    const blackStyle = TextStyle(color: Colors.black);
+
     return Scaffold(
       appBar: AppBar(title: const Text("Crear Ruta")),
       body: loadingData
@@ -81,16 +102,30 @@ class _AssignmentFormPageState extends State<AssignmentFormPage> {
                     // ==========================
                     // VEHÍCULO
                     // ==========================
-                    DropdownButtonFormField<int>(
-                      decoration: const InputDecoration(labelText: "Vehículo"),
-                      value: selectedVehicle,
-                      items: vehicles
-                          .map((v) => DropdownMenuItem<int>(
+                    Theme(
+                      // esto asegura que el overlay del dropdown herede buen color
+                      data: Theme.of(context).copyWith(
+                        canvasColor: const Color(0xFF1F2937), // fondo del menú
+                      ),
+                      child: DropdownButtonFormField<int>(
+                        decoration: _whiteInput("Vehículo"),
+                        value: selectedVehicle,
+                        dropdownColor: const Color(0xFF1F2937), // menú oscuro
+                        iconEnabledColor: Colors.white,
+                        style: blackStyle, // texto seleccionado (blanco)
+                        items: vehicles
+                            .map(
+                              (v) => DropdownMenuItem<int>(
                                 value: v.id,
-                                child: Text(v.licensePlate),
-                              ))
-                          .toList(),
-                      onChanged: (v) => setState(() => selectedVehicle = v),
+                                child: Text(
+                                  v.licensePlate,
+                                  style: blackStyle, // texto del item (blanco)
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (v) => setState(() => selectedVehicle = v),
+                      ),
                     ),
 
                     const SizedBox(height: 20),
@@ -98,16 +133,29 @@ class _AssignmentFormPageState extends State<AssignmentFormPage> {
                     // ==========================
                     // CONDUCTOR
                     // ==========================
-                    DropdownButtonFormField<int>(
-                      decoration: const InputDecoration(labelText: "Conductor"),
-                      value: selectedDriver,
-                      items: drivers
-                          .map((d) => DropdownMenuItem<int>(
+                    Theme(
+                      data: Theme.of(context).copyWith(
+                        canvasColor: const Color(0xFF1F2937),
+                      ),
+                      child: DropdownButtonFormField<int>(
+                        decoration: _whiteInput("Conductor"),
+                        value: selectedDriver,
+                        dropdownColor: const Color(0xFF1F2937),
+                        iconEnabledColor: Colors.white,
+                        style: blackStyle,
+                        items: drivers
+                            .map(
+                              (d) => DropdownMenuItem<int>(
                                 value: d.id,
-                                child: Text(d.fullName),
-                              ))
-                          .toList(),
-                      onChanged: (v) => setState(() => selectedDriver = v),
+                                child: Text(
+                                  d.fullName,
+                                  style: blackStyle,
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (v) => setState(() => selectedDriver = v),
+                      ),
                     ),
 
                     const SizedBox(height: 20),
@@ -117,9 +165,9 @@ class _AssignmentFormPageState extends State<AssignmentFormPage> {
                     // ==========================
                     TextFormField(
                       controller: routeCtrl,
-                      decoration: const InputDecoration(
-                        labelText: "Ruta (Ej: Lima → Callao)",
-                      ),
+                      style: blackStyle,       // ✅ texto escrito blanco
+                      cursorColor: Colors.black, // ✅ cursor blanco
+                      decoration: _whiteInput("Ruta (Ej: Lima → Callao)"),
                     ),
 
                     const SizedBox(height: 30),
@@ -136,8 +184,7 @@ class _AssignmentFormPageState extends State<AssignmentFormPage> {
                               routeCtrl.text.trim().isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content:
-                                    Text("Completa todos los campos requeridos"),
+                                content: Text("Completa todos los campos requeridos"),
                               ),
                             );
                             return;

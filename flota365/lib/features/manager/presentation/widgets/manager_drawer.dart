@@ -1,3 +1,5 @@
+import 'package:flota365/core/session/app_session.dart';
+import 'package:flota365/main.dart';
 import 'package:flutter/material.dart';
 
 class ManagerDrawer extends StatelessWidget {
@@ -12,16 +14,31 @@ class ManagerDrawer extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-
             const SizedBox(height: 40),
 
             // ========= USUARIO =========
             _item(
-              icon: Icons.person,
-              label: "Usuario",
-              color: Colors.teal,
-              onTap: () {},
-            ),
+               icon: Icons.person,
+                label: "Usuario",
+                color: Colors.teal,
+                onTap: () {
+                  Navigator.pop(context); // ✅ cierra el drawer
+                  final id = AppSession.userId;
+
+                  if (id == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("No hay userId en sesión. Revisa el login.")),
+                    );
+                    return;
+                  }
+
+                  Navigator.pushNamed(
+                    context,
+                    "/manager/profile",
+                    arguments: {'userId': id}, // ✅ esto lo lee tu ManagerProfilePage
+                  );
+                },
+              ),
 
             const SizedBox(height: 10),
 
@@ -53,41 +70,13 @@ class ManagerDrawer extends StatelessWidget {
               onTap: () => Navigator.pushNamed(context, "/manager/assignments"),
             ),
 
-
-            // ========= MONITOREO =========
-            _item(
-              icon: Icons.remove_red_eye_rounded,
-              label: "Monitoreo",
-              color: Colors.teal,
-              onTap: () {
-                Navigator.pushNamed(context, "/manager/monitoring");
-              },
-            ),
-
             // ========= REPORTES =========
             _item(
               icon: Icons.description_rounded,
               label: "Reportes",
               color: Colors.teal,
-              onTap: () {
-                Navigator.pushNamed(context, "/manager/reports");
-              },
-            ),
+             onTap: () => Navigator.pushNamed(context, AppRoutes.managerReportsHub),
 
-            // ========= NOTIFICACIONES =========
-            _item(
-              icon: Icons.notifications_active_rounded,
-              label: "Notificaciones",
-              color: Colors.teal,
-              onTap: () {},
-            ),
-
-            // ========= SERVICIO AL CLIENTE =========
-            _item(
-              icon: Icons.help_outline_rounded,
-              label: "Servicio al cliente",
-              color: Colors.teal,
-              onTap: () {},
             ),
 
             const Spacer(),
@@ -113,9 +102,6 @@ class ManagerDrawer extends StatelessWidget {
     );
   }
 
-  // ===========================================================
-  // ITEM VISUAL (como tu mockup)
-  // ===========================================================
   Widget _item({
     required IconData icon,
     required String label,

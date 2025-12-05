@@ -21,7 +21,6 @@ class VehicleFormPage extends StatefulWidget {
   State<VehicleFormPage> createState() => _VehicleFormPageState();
 }
 
-
 class _VehicleFormPageState extends State<VehicleFormPage> {
   final _formKey = GlobalKey<FormState>();
 
@@ -40,28 +39,36 @@ class _VehicleFormPageState extends State<VehicleFormPage> {
 
   bool get isEdit => widget.vehicle != null;
 
+  // ✅ SOLO UI: asegura texto negro al escribir
+  TextStyle get _inputTextStyle => const TextStyle(color: Colors.black);
+  InputDecoration _inputDeco(String label) => InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.black87),
+        hintStyle: const TextStyle(color: Colors.black45),
+      );
+
   @override
-void initState() {
-  super.initState();
+  void initState() {
+    super.initState();
 
-  if (isEdit) {
-    final v = widget.vehicle!;
-    _editMileageCtrl.text = v.mileage.toString();
-    _statusCtrl.text = v.status;
-    _driverNameCtrl.text = v.driverName;
-  } else {
-    _yearCtrl.text = DateTime.now().year.toString();
-    _mileageCtrl.text = '0';
-
-    // 👇 Si viene desde una flota, autocompletamos:
-    if (widget.fleetId != null) {
-      _fleetIdCtrl.text = widget.fleetId.toString();
-      _fleetNameCtrl.text = widget.fleetName ?? '';
+    if (isEdit) {
+      final v = widget.vehicle!;
+      _editMileageCtrl.text = v.mileage.toString();
+      _statusCtrl.text = v.status;
+      _driverNameCtrl.text = v.driverName;
     } else {
-      _fleetIdCtrl.text = '0';
+      _yearCtrl.text = DateTime.now().year.toString();
+      _mileageCtrl.text = '0';
+
+      // 👇 Si viene desde una flota, autocompletamos:
+      if (widget.fleetId != null) {
+        _fleetIdCtrl.text = widget.fleetId.toString();
+        _fleetNameCtrl.text = widget.fleetName ?? '';
+      } else {
+        _fleetIdCtrl.text = '0';
+      }
     }
   }
-}
 
   @override
   void dispose() {
@@ -93,8 +100,7 @@ void initState() {
           id: v.id,
           mileage: mileage,
           status: _statusCtrl.text.isNotEmpty ? _statusCtrl.text : null,
-          driverName:
-              _driverNameCtrl.text.isNotEmpty ? _driverNameCtrl.text : null,
+          driverName: _driverNameCtrl.text.isNotEmpty ? _driverNameCtrl.text : null,
         ),
       );
 
@@ -116,7 +122,6 @@ void initState() {
       );
 
       Navigator.pop(context, true);
-
     }
   }
 
@@ -149,44 +154,50 @@ void initState() {
         children: [
           TextFormField(
             controller: _plateCtrl,
-            decoration: const InputDecoration(labelText: 'Placa'),
-            validator: (v) =>
-                (v == null || v.isEmpty) ? 'Ingresa la placa' : null,
+            style: _inputTextStyle,
+            cursorColor: Colors.black,
+            decoration: _inputDeco('Placa'),
+            validator: (v) => (v == null || v.isEmpty) ? 'Ingresa la placa' : null,
           ),
           TextFormField(
             controller: _brandCtrl,
-            decoration: const InputDecoration(labelText: 'Marca'),
-            validator: (v) =>
-                (v == null || v.isEmpty) ? 'Ingresa la marca' : null,
+            style: _inputTextStyle,
+            cursorColor: Colors.black,
+            decoration: _inputDeco('Marca'),
+            validator: (v) => (v == null || v.isEmpty) ? 'Ingresa la marca' : null,
           ),
           TextFormField(
             controller: _modelCtrl,
-            decoration: const InputDecoration(labelText: 'Modelo'),
-            validator: (v) =>
-                (v == null || v.isEmpty) ? 'Ingresa el modelo' : null,
+            style: _inputTextStyle,
+            cursorColor: Colors.black,
+            decoration: _inputDeco('Modelo'),
+            validator: (v) => (v == null || v.isEmpty) ? 'Ingresa el modelo' : null,
           ),
           TextFormField(
             controller: _yearCtrl,
-            decoration: const InputDecoration(labelText: 'Año'),
+            style: _inputTextStyle,
+            cursorColor: Colors.black,
+            decoration: _inputDeco('Año'),
             keyboardType: TextInputType.number,
-            validator: (v) =>
-                (v == null || int.tryParse(v) == null) ? 'Año inválido' : null,
+            validator: (v) => (v == null || int.tryParse(v) == null) ? 'Año inválido' : null,
           ),
           TextFormField(
             controller: _mileageCtrl,
-            decoration: const InputDecoration(labelText: 'Kilometraje'),
+            style: _inputTextStyle,
+            cursorColor: Colors.black,
+            decoration: _inputDeco('Kilometraje'),
             keyboardType: TextInputType.number,
-            validator: (v) => (v == null || int.tryParse(v) == null)
-                ? 'Kilometraje inválido'
-                : null,
+            validator: (v) => (v == null || int.tryParse(v) == null) ? 'Kilometraje inválido' : null,
           ),
           TextFormField(
             controller: _fleetIdCtrl,
-            readOnly: widget.fleetId != null,              // 👈 importante
-            decoration: const InputDecoration(labelText: 'ID de Flota'),
+            readOnly: widget.fleetId != null, // 👈 importante
+            style: _inputTextStyle,
+            cursorColor: Colors.black,
+            decoration: _inputDeco('ID de Flota'),
             keyboardType: TextInputType.number,
             validator: (v) {
-              if (widget.fleetId != null) return null;     // ya viene fijo
+              if (widget.fleetId != null) return null; // ya viene fijo
               if (v == null || int.tryParse(v) == null) {
                 return 'ID de flota inválido';
               }
@@ -195,17 +206,18 @@ void initState() {
           ),
           TextFormField(
             controller: _fleetNameCtrl,
-            readOnly: widget.fleetName != null,            // 👈 importante
-            decoration: const InputDecoration(labelText: 'Nombre de flota'),
+            readOnly: widget.fleetName != null, // 👈 importante
+            style: _inputTextStyle,
+            cursorColor: Colors.black,
+            decoration: _inputDeco('Nombre de flota'),
             validator: (v) {
-              if (widget.fleetName != null) return null;   // ya viene fija
+              if (widget.fleetName != null) return null; // ya viene fija
               if (v == null || v.isEmpty) {
                 return 'Ingresa el nombre de flota';
               }
               return null;
             },
           ),
-
         ],
       ),
     );
@@ -217,19 +229,24 @@ void initState() {
         children: [
           TextFormField(
             controller: _editMileageCtrl,
-            decoration: const InputDecoration(labelText: 'Kilometraje'),
+            style: _inputTextStyle,
+            cursorColor: Colors.black,
+            decoration: _inputDeco('Kilometraje'),
             keyboardType: TextInputType.number,
-            validator: (v) => (v == null || int.tryParse(v) == null)
-                ? 'Kilometraje inválido'
-                : null,
+            validator: (v) =>
+                (v == null || int.tryParse(v) == null) ? 'Kilometraje inválido' : null,
           ),
           TextFormField(
             controller: _statusCtrl,
-            decoration: const InputDecoration(labelText: 'Estado'),
+            style: _inputTextStyle,
+            cursorColor: Colors.black,
+            decoration: _inputDeco('Estado'),
           ),
           TextFormField(
             controller: _driverNameCtrl,
-            decoration: const InputDecoration(labelText: 'Nombre del conductor'),
+            style: _inputTextStyle,
+            cursorColor: Colors.black,
+            decoration: _inputDeco('Nombre del conductor'),
           ),
         ],
       ),

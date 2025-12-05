@@ -61,19 +61,85 @@ class ManagerService {
   }
 
 
-  //  REPORTS
+  // ==============================
+// MAINTENANCE
+// ==============================
+Future<Response> getMaintenanceRecords() {
+  return _dio.get('/api/Maintenance/records');
+}
 
-  Future<Response> getReports() {
-    return _dio.get(ApiPaths.reports);
-  }
+Future<Response> createMaintenanceRecord(Map<String, dynamic> data) {
+  return _dio.post(
+    '/api/Maintenance/records',
+    data: data,
+    options: Options(contentType: Headers.jsonContentType),
+  );
+}
 
-  Future<Response> createReport(Map<String, dynamic> body) {
-    return _dio.post(
-      ApiPaths.reports,
-      data: body,
-      options: Options(contentType: Headers.jsonContentType),
-    );
-  }
+Future<Response> getMaintenanceRecordById(int id) {
+  return _dio.get('/api/Maintenance/records/$id');
+}
+
+Future<Response> updateMaintenanceRecord(int id, Map<String, dynamic> data) {
+  return _dio.put(
+    '/api/Maintenance/records/$id',
+    data: data,
+    options: Options(contentType: Headers.jsonContentType),
+  );
+}
+
+Future<Response> deleteMaintenanceRecord(int id) {
+  return _dio.delete('/api/Maintenance/records/$id');
+}
+
+Future<Response> getMaintenanceRecordsByVehicle(int vehicleId) {
+  return _dio.get('/api/Maintenance/records/vehicle/$vehicleId');
+}
+
+Future<Response> getMaintenanceOverdue() {
+  return _dio.get('/api/Maintenance/records/overdue');
+}
+
+// ---- Services (catálogo) ----
+Future<Response> getMaintenanceServices() {
+  return _dio.get('/api/Maintenance/services');
+}
+
+Future<Response> createMaintenanceService(Map<String, dynamic> data) {
+  return _dio.post(
+    '/api/Maintenance/services',
+    data: data,
+    options: Options(contentType: Headers.jsonContentType),
+  );
+}
+
+Future<Response> getMaintenanceServiceById(int id) {
+  return _dio.get('/api/Maintenance/services/$id');
+}
+
+Future<Response> deleteMaintenanceService(int id) {
+  return _dio.delete('/api/Maintenance/services/$id');
+}
+
+Future<Response> getMaintenanceServicesByVehicle(int vehicleId) {
+  return _dio.get('/api/Maintenance/services/vehicle/$vehicleId');
+}
+
+// ==============================
+// REPORT
+// ==============================
+Future<Response> getReports() {
+  return _dio.get('/api/Report');
+}
+
+Future<Response> createReport(Map<String, dynamic> data) {
+  return _dio.post(
+    '/api/Report',
+    data: data,
+    options: Options(contentType: Headers.jsonContentType),
+  );
+}
+
 
   //  MANAGER
 
@@ -132,6 +198,30 @@ class ManagerService {
 Future<Response> getDriverById(int id) {
   return _dio.get('/api/Driver/$id'); // o ApiPaths.driverById(id)
 }
+// ==============================
+// USER (en módulo MANAGER, pero endpoints Auth)
+// ==============================
+
+Future<Response> getAuthProfileById(int id) {
+  return _dio.get(ApiPaths.authProfileId(id));
+}
+
+Future<Response> updateAuthProfileById(int id, Map<String, dynamic> body) {
+  return _dio.put(
+    ApiPaths.authProfileId(id),
+    data: body,
+    options: Options(contentType: Headers.jsonContentType),
+  );
+}
+
+Future<Response> changeAuthPasswordById(int id, Map<String, dynamic> body) {
+  return _dio.post(
+    ApiPaths.authChangePassword(id),
+    data: body,
+    options: Options(contentType: Headers.jsonContentType),
+  );
+}
+
 
 
 }

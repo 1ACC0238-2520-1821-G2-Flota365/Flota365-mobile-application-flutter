@@ -1,0 +1,11 @@
+class MaintenanceServiceEntity {
+  final int id;
+  final String name;
+  final String? description;
+
+  const MaintenanceServiceEntity({
+    required this.id,
+    required this.name,
+    this.description,
+  });
+}

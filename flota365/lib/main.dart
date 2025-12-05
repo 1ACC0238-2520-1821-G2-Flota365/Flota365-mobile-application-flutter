@@ -1,6 +1,13 @@
 import 'package:flota365/features/manager/presentation/pages/assignments/assignment_detail_page.dart';
 import 'package:flota365/features/manager/presentation/pages/assignments/assignment_list_page.dart';
 import 'package:flota365/features/manager/presentation/pages/dashboard_page.dart';
+import 'package:flota365/features/manager/presentation/pages/manager_profile_page.dart';
+import 'package:flota365/features/manager/presentation/pages/reports/maintenance_overdue_page.dart';
+import 'package:flota365/features/manager/presentation/pages/reports/maintenance_records_page.dart';
+import 'package:flota365/features/manager/presentation/pages/reports/maintenance_services_page.dart';
+import 'package:flota365/features/manager/presentation/pages/reports/report_form_page.dart';
+import 'package:flota365/features/manager/presentation/pages/reports/reports_hub_page.dart';
+import 'package:flota365/features/manager/presentation/pages/reports/reports_list_page.dart';
 import 'package:flutter/material.dart';
 import 'core/ui/theme.dart';
 
@@ -31,6 +38,9 @@ class AppRoutes {
   static const regDriver = '/register/driver';
   static const regManager = '/register/manager';
 
+   static const managerProfile = "/manager/profile";
+
+
   // DRIVER
   static const driverHome = '/driver/home';
 
@@ -40,6 +50,29 @@ class AppRoutes {
   static const managerFleets = '/manager/fleets'; // FleetPage
   static const managerVehicles = '/manager/vehicles'; 
   static const managerAssignments = '/manager/assignments';
+
+    // REPORTS
+  static const managerReports = '/manager/reports';
+  static const reportsList = '/manager/reports/list';
+  static const reportForm = '/manager/reports/new';
+
+  static const maintenanceRecords = '/manager/reports/maintenance/records';
+  static const maintenanceOverdue = '/manager/reports/maintenance/overdue';
+  static const maintenanceServices = '/manager/reports/maintenance/services';
+
+    // REPORTS / MAINTENANCE HUB
+  static const managerReportsHub = '/manager/reports';
+
+  // MAINTENANCE
+  static const managerMaintenanceRecords = '/manager/maintenance/records';
+  static const managerMaintenanceOverdue = '/manager/maintenance/overdue';
+  static const managerMaintenanceServices = '/manager/maintenance/services';
+
+  // REPORTS
+  static const managerReportsList = '/manager/reports/list';
+  static const managerReportForm = '/manager/reports/new';
+
+
 }
 
 void main() {
@@ -66,12 +99,31 @@ class FlotaApp extends StatelessWidget {
         AppRoutes.regManager: (_) => const RegisterManagerPage(),
 
         // MANAGER
+        AppRoutes.managerProfile: (_) => const ManagerProfilePage(),
         AppRoutes.managerHome: (_) => const ManagerDashboardPage(),
         AppRoutes.managerDashboard: (_) => const ManagerDashboardPage(),
         AppRoutes.managerFleets: (_) => const FleetPage(),
         AppRoutes.managerVehicles: (_) => const VehiclesPage(),
         "/manager/fleet/detail": (_) => const FleetDetailPage(),
         AppRoutes.managerAssignments: (_) => const AssignmentListPage(),
+
+                // REPORTS
+        AppRoutes.managerReports: (_) => const ReportsHubPage(),
+        AppRoutes.reportsList: (_) => const ReportsListPage(),
+        AppRoutes.reportForm: (_) => const ReportFormPage(),
+        AppRoutes.maintenanceRecords: (_) => const MaintenanceRecordsPage(),
+        AppRoutes.maintenanceOverdue: (_) => const MaintenanceOverduePage(),
+        AppRoutes.maintenanceServices: (_) => const MaintenanceServicesPage(),
+
+        // REPORTS / MAINTENANCE
+        AppRoutes.managerReportsHub: (_) => const ReportsHubPage(),
+        AppRoutes.managerMaintenanceRecords: (_) => const MaintenanceRecordsPage(),
+        AppRoutes.managerMaintenanceOverdue: (_) => const MaintenanceOverduePage(),
+        AppRoutes.managerMaintenanceServices: (_) => const MaintenanceServicesPage(),
+        AppRoutes.managerReportsList: (_) => const ReportsListPage(),
+        AppRoutes.managerReportForm: (_) => const ReportFormPage(),
+
+
         
 
 

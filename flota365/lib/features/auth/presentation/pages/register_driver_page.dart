@@ -53,7 +53,6 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
       final first = parts.isNotEmpty ? parts.first : 'Conductor';
       final last = parts.length > 1 ? parts.sublist(1).join(' ').trim() : '';
 
-      // 1) Crear usuario
       final user = await authRepo.register(
         firstName: first,
         lastName: last,
@@ -62,7 +61,6 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
         role: 'driver',
       );
 
-      // 2) Asegurar driver
       final driver = await driverRepo.ensureDriverForEmail(
         email: email.text.trim(),
         fullName: fullName,
@@ -74,7 +72,6 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
 
       final int driverId = driver['id'] as int;
 
-      // 3) Login automático
       final logged = await authRepo.login(
         email.text.trim(),
         pass.text.trim(),
@@ -103,6 +100,31 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ Fuerza colores visibles aunque el theme esté raro
+    const textStyle = TextStyle(color: Colors.black87);
+    const labelStyle = TextStyle(color: Colors.black54);
+    const hintStyle = TextStyle(color: Colors.black38);
+
+    InputDecoration decor(String label, {Widget? suffixIcon}) {
+      return InputDecoration(
+        labelText: label,
+        labelStyle: labelStyle,
+        hintStyle: hintStyle,
+        filled: true,
+        fillColor: Colors.white,
+        suffixIcon: suffixIcon,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Colors.teal, width: 1.5),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('Crear cuenta — Conductor')),
       body: SingleChildScrollView(
@@ -111,8 +133,9 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
             child: Card(
-              shape:
-                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Form(
@@ -121,29 +144,35 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
                     children: [
                       TextFormField(
                         controller: name,
-                        decoration:
-                            const InputDecoration(labelText: 'Nombre completo'),
+                        style: textStyle,          // ✅ texto escrito
+                        cursorColor: Colors.teal,  // ✅ cursor visible
+                        decoration: decor('Nombre completo'),
                         validator: (v) => v!.isEmpty ? 'Requerido' : null,
                       ),
                       const SizedBox(height: 10),
 
                       TextFormField(
                         controller: email,
-                        decoration: const InputDecoration(
-                            labelText: 'Correo electrónico'),
+                        style: textStyle,
+                        cursorColor: Colors.teal,
+                        decoration: decor('Correo electrónico'),
                         validator: Validators.email,
+                        keyboardType: TextInputType.emailAddress,
                       ),
                       const SizedBox(height: 10),
 
                       TextFormField(
                         controller: pass,
-                        decoration: InputDecoration(
-                          labelText: 'Contraseña',
+                        style: textStyle,
+                        cursorColor: Colors.teal,
+                        decoration: decor(
+                          'Contraseña',
                           suffixIcon: IconButton(
                             icon: Icon(
-                                obscure ? Icons.visibility : Icons.visibility_off),
-                            onPressed: () =>
-                                setState(() => obscure = !obscure),
+                              obscure ? Icons.visibility : Icons.visibility_off,
+                              color: Colors.teal,
+                            ),
+                            onPressed: () => setState(() => obscure = !obscure),
                           ),
                         ),
                         obscureText: obscure,
@@ -151,13 +180,22 @@ class _RegisterDriverPageState extends State<RegisterDriverPage> {
                       ),
                       const SizedBox(height: 10),
 
-                      CheckboxListTile(
-                        value: acceptTerms,
-                        onChanged: (v) =>
-                            setState(() => acceptTerms = v ?? false),
-                        title: const Text(
-                            'Acepto los Términos y la Política de Privacidad'),
-                        controlAffinity: ListTileControlAffinity.leading,
+                      Theme(
+                        data: Theme.of(context).copyWith(
+                          checkboxTheme: CheckboxThemeData(
+                            fillColor: WidgetStateProperty.all(Colors.teal),
+                            checkColor: WidgetStateProperty.all(Colors.white),
+                          ),
+                        ),
+                        child: CheckboxListTile(
+                          value: acceptTerms,
+                          onChanged: (v) => setState(() => acceptTerms = v ?? false),
+                          title: const Text(
+                            'Acepto los Términos y la Política de Privacidad',
+                            style: TextStyle(color: Colors.black87), // ✅ visible
+                          ),
+                          controlAffinity: ListTileControlAffinity.leading,
+                        ),
                       ),
 
                       const SizedBox(height: 8),

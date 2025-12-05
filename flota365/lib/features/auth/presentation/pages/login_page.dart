@@ -1,3 +1,4 @@
+import 'package:flota365/core/session/app_session.dart';
 import 'package:flota365/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -68,6 +69,8 @@ class _LoginViewState extends State<_LoginView> {
                         },
                       );
                     } else if (role.contains('manager')) {
+                          AppSession.userId = u.id; // ✅ guardar ID del usuario logueado
+
                           // MANAGER
                           Navigator.pushNamedAndRemoveUntil(
                               context,

@@ -90,49 +90,96 @@ class _FleetFormPageState extends State<FleetFormPage> {
             key: _formKey,
             child: Column(
               children: [
-                TextFormField(
-                  controller: nameCtrl,
-                  decoration: const InputDecoration(labelText: 'Nombre'),
-                  validator: (v) =>
-                      v == null || v.isEmpty ? 'Campo obligatorio' : null,
-                ),
-                const SizedBox(height: 12),
+                // helper local: decor pro que fuerza colores visibles
+                Builder(builder: (context) {
+                  InputDecoration dec(String label, {String? hint, IconData? icon}) {
+                    return InputDecoration(
+                      labelText: label,
+                      hintText: hint,
+                      filled: true,
+                      fillColor: Colors.white,
+                      labelStyle: const TextStyle(color: Colors.black54),
+                      hintStyle: const TextStyle(color: Colors.black38),
+                      prefixIcon: icon == null
+                          ? null
+                          : Icon(icon, color: Colors.teal),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(color: Colors.teal, width: 1.5),
+                      ),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    );
+                  }
 
-                TextFormField(
-                  controller: descCtrl,
-                  decoration:
-                      const InputDecoration(labelText: 'Descripción'),
-                  maxLines: 2,
-                ),
-                const SizedBox(height: 12),
+                  const textStyle = TextStyle(color: Colors.black87);
 
-                TextFormField(
-                  controller: typeCtrl,
-                  decoration:
-                      const InputDecoration(labelText: 'Tipo (número)'),
-                  keyboardType: TextInputType.number,
-                ),
-                const SizedBox(height: 12),
+                  return Column(
+                    children: [
+                      TextFormField(
+                        controller: nameCtrl,
+                        style: textStyle, // ✅ fuerza texto negro
+                        decoration: dec("Nombre", icon: Icons.business_rounded),
+                        validator: (v) =>
+                            v == null || v.isEmpty ? 'Campo obligatorio' : null,
+                      ),
+                      const SizedBox(height: 12),
 
-                SwitchListTile(
-                  title: const Text("Activo"),
-                  value: isActive,
-                  onChanged: (v) => setState(() => isActive = v),
-                ),
+                      TextFormField(
+                        controller: descCtrl,
+                        style: textStyle,
+                        decoration: dec("Descripción", icon: Icons.description_rounded),
+                        maxLines: 2,
+                      ),
+                      const SizedBox(height: 12),
 
-                const SizedBox(height: 20),
+                      TextFormField(
+                        controller: typeCtrl,
+                        style: textStyle,
+                        decoration: dec("Tipo (número)", icon: Icons.numbers_rounded),
+                        keyboardType: TextInputType.number,
+                      ),
+                      const SizedBox(height: 12),
 
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: _submit,
-                    child: Text(isEditing ? "Guardar cambios" : "Crear flota"),
-                  ),
-                )
+                      Theme(
+                        // ✅ evita que el SwitchListTile herede texto/blanco raro del theme
+                        data: Theme.of(context).copyWith(
+                          listTileTheme: const ListTileThemeData(
+                            textColor: Colors.black87,
+                            iconColor: Colors.teal,
+                          ),
+                        ),
+                        child: SwitchListTile(
+                          title: const Text(
+                            "Activo",
+                            style: TextStyle(color: Colors.black87),
+                          ),
+                          value: isActive,
+                          onChanged: (v) => setState(() => isActive = v),
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: _submit,
+                          child: Text(isEditing ? "Guardar cambios" : "Crear flota"),
+                        ),
+                      ),
+                    ],
+                  );
+                }),
               ],
             ),
           ),
+
         ),
       ),
     );
